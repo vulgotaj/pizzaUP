@@ -49,7 +49,6 @@ model Product{
 
   category_id String
   category Category @relation(fields:[category_id], references:[id], onDelete: Cascade)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -79,7 +78,6 @@ model Item{
 
   order_id String
   order Order @relation(fields:[order_id], references:[id], onDelete: Cascade)
-
   product_id String
   product Product @relation(fields:[product_id], references:[id], onDelete: Cascade)
 }
