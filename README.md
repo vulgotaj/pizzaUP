@@ -29,6 +29,8 @@ As aplicações web e mobile fazem parte da visão do produto, mas ainda não es
 - Prisma ORM
 - PostgreSQL
 
+Consulte [Contexto do projeto](./CONTEXTO_PROJETO.md) para a arquitetura atual, endpoints, validações, middlewares, modelagem do banco e versões das dependências.
+
 ## Começando
 
 ### Pré-requisitos
@@ -92,9 +94,7 @@ O servidor usa a porta `3333` por padrão. Para escolher outra porta, altere `PO
 
 ## Estado atual
 
-O projeto está em fase inicial. O backend expõe `POST /users` e valida `name`, `email` e `password` (mínimo de seis caracteres). O cadastro ainda é apenas um esqueleto: não persiste o usuário no banco e, atualmente, escreve os dados recebidos no console. Portanto, não use dados ou senhas reais nesse endpoint.
-
-O schema Prisma descreve a estrutura planejada para usuários, categorias, produtos, pedidos e itens, com PostgreSQL como banco de dados. As funcionalidades de cardápio, pedidos, integração com a cozinha e persistência da API ainda não estão implementadas. As aplicações web e mobile também não estão presentes no repositório.
+O backend implementa cadastro e autenticação de usuários, consulta do usuário autenticado e criação de categorias. O schema Prisma também define produtos, pedidos e itens, mas os endpoints e fluxos de cardápio e pedidos ainda não estão implementados. As aplicações web, mobile e da cozinha também não estão presentes no repositório. Consulte [Contexto do projeto](./CONTEXTO_PROJETO.md) para os detalhes da implementação atual.
 
 ## Licença
 
