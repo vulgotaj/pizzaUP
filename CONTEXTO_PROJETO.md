@@ -6,6 +6,8 @@ O **pizzaUP** é um sistema para gerenciamento de pedidos de uma pizzaria. A vis
 
 Este documento descreve o estado atual do código, distinguindo funcionalidades implementadas da modelagem prevista no banco.
 
+**Atualizado em 26/10/2026:** a API agora inclui operações para criar, listar, detalhar, enviar, finalizar e excluir pedidos, além de adicionar e remover itens. Também foram adicionadas a exclusão lógica de produtos e a implementação de consulta de produtos por categoria; essa última ainda não está conectada corretamente à rota.
+
 ## Arquitetura
 
 O backend usa uma API REST com **Node.js, TypeScript e Express**. O fluxo adotado é:
@@ -33,15 +35,20 @@ O servidor carrega variáveis de ambiente, habilita JSON e CORS e monta as rotas
 | `GET` | `/me` | Exige JWT válido | Retorna `id`, `name`, `email`, `role` e `createdAt` do usuário autenticado (HTTP 200). |
 | `GET` | `/category` | Exige JWT válido; qualquer usuário autenticado | Lista todas as categorias, retornando `id`, `name` e `createdAt` (HTTP 200). |
 | `POST` | `/category` | Exige JWT e papel `ADMIN`; valida o corpo com `createCategorySchema` | Cria uma categoria e retorna `id`, `name` e `createdAt` (HTTP 201). |
-| `GET` | `/products` | Exige JWT válido; valida o query param opcional `disabled` para aceitar somente `true` ou `false` | Lista produtos pelo valor de `disabled` (padrão `false`), retornando `id`, `name`, `price`, `description`, `banner`, `disabled`, `category_id` e `createdAt` em ordem decrescente de criação (HTTP 200). |
+| `GET` | `/products` | Exige JWT válido; query param opcional `disabled` | Lista produtos filtrando `disabled` (somente o valor textual `true` ativa o filtro; omitido ou qualquer outro valor resulta em `false`), incluindo dados resumidos da categoria, em ordem decrescente de criação (HTTP 200). |
 | `POST` | `/product` | Exige JWT e papel `ADMIN`; recebe `multipart/form-data` com o arquivo `file` e valida os campos com `createProductSchema` | Faz upload da imagem do produto e cria o produto, retornando `id`, `name`, `price`, `description`, `banner`, `category_id` e `createdAt` (HTTP 200). |
-| `POST` | `/order` | Exige JWT válido; qualquer usuário autenticado; valida `table` como inteiro positivo e `name` como texto não vazio | Cria um pedido em rascunho e retorna `id`, `table`, `status`, `draft`, `name` e `createdAt` (HTTP 201). |
-| `GET` | `/orders` | Exige JWT válido; aceita o query param opcional `draft` | Lista pedidos filtrando `draft` (quando omitido, lista pedidos não rascunho), incluindo seus itens e dados dos produtos (HTTP 200). |
-| `GET` | `/order/detail` | Exige JWT válido; valida o query param obrigatório `order_id` com `detailOrderSchema` | Busca um pedido pelo ID e retorna todos os campos do pedido, seus itens e os dados completos dos produtos relacionados (HTTP 200); retorna HTTP 404 quando o pedido não existe. |
+| `DELETE` | `/product` | Exige JWT e papel `ADMIN`; recebe `product_id` na query | Arquiva o produto atualizando `disabled` para `true`, sem apagar o registro (HTTP 200). |
+| `GET` | `/category/product` | Exige JWT válido; recebe `category_id` na query | **Atenção:** a rota está conectada a `ListProductsController`, que lista produtos sem aplicar `category_id`. Existe um controller/service específicos para filtrar a categoria, mas o controller ainda não foi ligado à rota. |
+| `POST` | `/order` | Exige JWT válido; qualquer usuário autenticado; valida `table` como inteiro positivo e aceita `name` opcional como texto | Cria um pedido em rascunho e retorna `id`, `table`, `status`, `draft`, `name` e `createdAt` (HTTP 201). |
+| `GET` | `/orders` | Exige JWT válido; aceita o query param opcional `draft` | Lista pedidos; somente `draft=true` retorna rascunhos, enquanto omitido ou qualquer outro valor retorna pedidos enviados. Inclui itens e dados resumidos dos produtos (HTTP 200). |
+| `GET` | `/order/detail` | Exige JWT válido; valida o query param obrigatório `order_id` com `detailOrderSchema` | Busca um pedido pelo ID e retorna os campos selecionados do pedido, seus itens e dados dos produtos (HTTP 200). Quando não encontra o pedido, o service lança erro, que o middleware global converte em HTTP 400. |
+| `PUT` | `/order/send` | Exige JWT válido; recebe `order_id` e `name` no corpo | Atualiza o pedido para `draft=false` e grava o nome, retornando os campos principais do pedido (HTTP 200). |
+| `PUT` | `/order/finish` | Exige JWT válido; recebe `order_id` no corpo | Atualiza `status=true` e retorna os campos principais do pedido (HTTP 200). |
+| `DELETE` | `/order` | Exige JWT válido; recebe `order_id` na query | Exclui o pedido; os itens associados são removidos pela regra de cascata do banco (HTTP 200). |
 | `POST` | `/order/add` | Exige JWT válido; valida `order_id`, `product_id` e `amount` no corpo | Adiciona um item ao pedido e retorna seus dados e os dados do produto (HTTP 201). |
-| `DELETE` | `/order/remove` | Exige JWT válido; valida `item_id` na query | Verifica se o item existe e, se existir, remove o registro da tabela `Item`. |
+| `DELETE` | `/order/remove` | Exige JWT válido; valida `item_id` na query | Remove o item da tabela `Item` e responde com mensagem de sucesso (HTTP 200). |
 
-As rotas estão declaradas em [`backend/src/routes.ts`](./backend/src/routes.ts). O endpoint de pedidos usa o modelo existente, sem exigir o papel `ADMIN`.
+As rotas estão declaradas em [`backend/src/routes.ts`](./backend/src/routes.ts). Os endpoints de pedidos exigem autenticação, mas não o papel `ADMIN`.
 
 ## Validação de entrada
 
@@ -52,22 +59,24 @@ Regras atuais:
 - **Cadastro (`createUserSchema`)**: `name` é texto com pelo menos 3 caracteres; `email` deve ser válido; `password` é texto com pelo menos 6 caracteres.
 - **Autenticação (`authUserSchema`)**: `email` deve ser válido; `password` é texto não vazio.
 - **Criação de categoria (`createCategorySchema`)**: `name` é texto com pelo menos 2 caracteres.
-- **Listagem de produtos (`listProductsSchema`)**: `disabled`, quando informado na query, deve ser exatamente `true` ou `false`; quando omitido, o controller usa `false`.
+- **Listagem de produtos (`listProductsSchema`)**: aceita `disabled` como texto opcional, sem restringir seus valores; o service só interpreta exatamente `true` como verdadeiro.
 - **Criação de produto (`createProductSchema`)**: `name`, `description` e `category_id` são textos não vazios; `price` é texto não vazio contendo somente dígitos. O controller converte `price` para inteiro. A imagem é obrigatória e enviada separadamente no campo `file` do formulário `multipart/form-data`.
-- **Criação de pedido (`createOrderSchema`)**: `table` deve ser um inteiro positivo e `name` deve ser um texto não vazio.
+- **Criação de pedido (`createOrderSchema`)**: `table` deve ser um inteiro positivo; `name` é opcional e, quando informado, deve ser texto.
 - **Adição de item (`addItemSchema`)**: `order_id` e `product_id` devem ser textos não vazios; `amount` deve ser um inteiro positivo.
 - **Remoção de item (`removeItemSchema`)**: `item_id` é obrigatório como texto não vazio no query param.
 - **Detalhe do pedido (`detailOrderSchema`)**: `order_id` é obrigatório como texto não vazio no query param.
+- **Envio de pedido (`sendOrderSchema`)**: exige `order_id` e `name` como textos, sem validação de conteúdo não vazio.
+- **Finalização (`finishOrderSchema`) e exclusão (`deleteOrderSchema`)**: exigem `order_id` como texto; não validam conteúdo não vazio.
 
-Erros de validação retornam HTTP 400, com `error` e uma lista `details` contendo as mensagens dos problemas encontrados. Os schemas ficam em [`backend/src/schemas/`](./backend/src/schemas/).
+Erros de validação retornam HTTP 400, com `error` e uma lista `details` contendo as mensagens dos problemas encontrados. O middleware valida os dados, mas não substitui `req.body` ou `req.query` pelos valores analisados. Os schemas ficam em [`backend/src/schemas/`](./backend/src/schemas/).
 
 ## Middlewares e tratamento de erros
 
 - **`validateSchema(schema)`** (`backend/src/middlewares/validateSchema.ts`): executa o schema de forma assíncrona; responde HTTP 400 para erros Zod e HTTP 500 para outros erros durante a validação.
 - **`isAuthenticated`** (`backend/src/middlewares/isAuthenticated.ts`): lê o token do cabeçalho `Authorization`, verifica a assinatura usando `JWT_SECRET` e define `req.userId` a partir do `sub` do JWT. Responde HTTP 401 se o token estiver ausente ou inválido.
 - **`isAdmin`** (`backend/src/middlewares/isAdmin.ts`): consulta o usuário autenticado no banco e permite continuar somente se seu papel for `ADMIN`. Responde HTTP 401 quando não há usuário associado ou o papel não é administrativo. É usado nas rotas de criação de categoria e produto.
-- **Tratamento global** (`backend/src/server.ts`): o middleware final responde HTTP 400 com a mensagem para erros que são instâncias de `Error`; para os demais, responde HTTP 500 com `"Internal server error"`.
-- **Services**: usar `try/catch` em todos os Services para tratar falhas das operações de negócio e do acesso a dados.
+- **Tratamento global** (`backend/src/server.ts`): o middleware final responde HTTP 400 com a mensagem para erros que são instâncias de `Error`; para os demais, responde HTTP 500 com `"Internal server error"`. Assim, erros de entidades não encontradas nos services não são convertidos em HTTP 404.
+- **Services**: os services concentram as operações Prisma; o tratamento com `try/catch` varia entre eles, e alguns substituem o erro original por uma mensagem genérica.
 
 O papel padrão criado para usuários é `STAFF`. O JWT usa a variável de ambiente `JWT_SECRET`; ela deve ser configurada para autenticação funcionar.
 
@@ -148,7 +157,11 @@ Na pasta `backend`, instale as dependências com `npm install` e inicie o modo d
 
 ## Estado e limites conhecidos
 
-- O backend já implementa cadastro e autenticação de usuários, consulta do usuário autenticado, listagem e criação de categorias, listagem filtrada de produtos, criação e exclusão lógica de produtos, além da criação/listagem/detalhamento de pedidos e adição/remoção de itens.
-- A criação de usuário, categoria e produto e a autenticação consultam ou gravam no banco via Prisma.
-- A remoção de item apaga o registro correspondente na tabela `Item`; a exclusão de pedidos e o fluxo completo de atualização de pedidos ainda não estão implementados.
+- O backend implementa cadastro e autenticação de usuários, consulta do usuário autenticado, listagem/criação de categorias, listagem/criação/arquivamento de produtos e operações de pedidos: criação, listagem, detalhamento, envio, finalização, exclusão e inclusão/remoção de itens.
+- Os produtos são arquivados por exclusão lógica (`disabled=true`); a exclusão de um pedido é física e remove seus itens associados por cascata.
+- A busca de produtos por categoria tem service/controller próprios, mas a rota `/category/product` está conectada ao controller de listagem geral e não aplica o filtro de categoria.
+- A validação de produto em `AddItemOrderService` consulta o modelo de pedido usando o `product_id`; a verificação não consulta o modelo de produto e pode impedir a inclusão correta de itens.
+- A listagem de produtos e pedidos interpreta apenas `disabled=true` e `draft=true` como verdadeiro; outros valores não são rejeitados pela validação e resultam em filtros `false`.
+- Não há associação entre pedidos e usuários no modelo atual, nem autorização por proprietário; os endpoints de pedido só exigem JWT.
+- Não há scripts de teste ou build configurados em `backend/package.json`; o script disponível é `npm run dev`.
 - As aplicações mobile, cozinha e administração não estão presentes no repositório atual.

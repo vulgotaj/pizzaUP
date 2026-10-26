@@ -29,7 +29,7 @@ As aplicações web e mobile fazem parte da visão do produto, mas ainda não es
 - Prisma ORM
 - PostgreSQL
 
-Consulte [Contexto do projeto](./CONTEXTO_PROJETO.md) para a arquitetura atual, endpoints, validações, middlewares, modelagem do banco e versões das dependências.
+Consulte [Contexto do projeto](./CONTEXTO_PROJETO.md) para a arquitetura atual, validações, middlewares, modelagem do banco e versões das dependências. A referência de rotas, parâmetros e exemplos de requisição está em [endpoints.md](./endpoints.md).
 
 ## Começando
 
@@ -94,7 +94,7 @@ O servidor usa a porta `3333` por padrão. Para escolher outra porta, altere `PO
 
 ## Estado atual
 
-O backend implementa cadastro e autenticação de usuários, consulta do usuário autenticado e criação de categorias. O schema Prisma também define produtos, pedidos e itens, mas os endpoints e fluxos de cardápio e pedidos ainda não estão implementados. As aplicações web, mobile e da cozinha também não estão presentes no repositório. Consulte [Contexto do projeto](./CONTEXTO_PROJETO.md) para os detalhes da implementação atual.
+O backend implementa cadastro e autenticação de usuários, categorias, produtos e operações de pedidos (criação, envio, finalização, exclusão e gerenciamento de itens). A busca de produtos por categoria ainda não está corretamente conectada à rota. As aplicações web, mobile e da cozinha também não estão presentes no repositório. Consulte [Contexto do projeto](./CONTEXTO_PROJETO.md) para os detalhes da implementação e limitações atuais.
 
 ## Licença
 
