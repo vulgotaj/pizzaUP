@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { apiClient } from './api';
 import { User } from './types';
+import { redirect } from 'next/navigation';
 
 const COOKIE_NAME = "token_pizzaUP";
 
@@ -42,4 +43,18 @@ export async function getUser(): Promise<User | null>{
     console.log(error)
     return null;
   }
+}
+
+export async function requiredAdmin(): Promise<User>{
+  const user = await getUser();
+
+  if(!user){
+    redirect("/login")
+  }
+
+  if(user.role !== "ADMIN"){
+    redirect("/access-denied")
+  }
+
+  return user;
 }
