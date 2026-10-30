@@ -1,101 +1,117 @@
 # pizzaUP
 
-O **pizzaUP** é um projeto fullstack para gerenciamento de pedidos de uma pizzaria. A proposta é conectar o atendimento, a cozinha e a administração em um único sistema.
+Sistema full stack para gerenciamento de pedidos de uma pizzaria. O projeto reúne uma API REST em Node.js e uma interface web administrativa em Next.js para acompanhar pedidos e gerenciar o cardápio.
 
-## Visão do produto
+## Funcionalidades
 
-- **Aplicativo mobile para garçons:** permite consultar o cardápio e registrar os pedidos dos clientes durante o atendimento.
-- **Tela da cozinha:** recebe os pedidos enviados pelos garçons para que a equipe acompanhe e prepare cada pedido.
-- **Área administrativa:** permite gerenciar os produtos disponíveis no cardápio e outras informações da operação.
-- **Backend:** centraliza as regras de negócio e a comunicação entre as aplicações.
+- Cadastro e autenticação de usuários com token JWT.
+- Controle de acesso por perfil, com operações administrativas para categorias e produtos.
+- Cadastro e listagem de categorias e produtos, com upload de imagens para o Cloudinary.
+- Criação e acompanhamento de pedidos, gerenciamento de itens, envio para preparo, finalização e exclusão.
+- Painel web para visualizar pedidos e administrar produtos e categorias.
 
-O fluxo esperado é: o garçom registra um pedido no aplicativo, o pedido chega à cozinha para preparo e a administração mantém o cardápio atualizado.
+> O projeto está em desenvolvimento. Consulte [CONTEXTO_PROJETO.md](./CONTEXTO_PROJETO.md) para detalhes do estado atual da API e limitações conhecidas. A referência dos endpoints está em [endpoints.md](./endpoints.md).
 
-## Estrutura do projeto
+## Tecnologias
+
+**Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS 4 e componentes shadcn/ui.
+
+**Backend:** Node.js, TypeScript, Express 5, Prisma 7, PostgreSQL, Zod, JWT, bcryptjs e Cloudinary.
+
+## Estrutura
 
 ```text
 pizzaUP/
-└── backend/   # API em desenvolvimento
+├── backend/   # API REST, regras de negócio e acesso ao PostgreSQL
+├── frontend/  # Aplicação web Next.js
+├── CONTEXTO_PROJETO.md
+└── endpoints.md
 ```
 
-As aplicações web e mobile fazem parte da visão do produto, mas ainda não estão presentes na estrutura atual do repositório.
-
-## Tecnologias do backend
-
-- Node.js
-- TypeScript
-- Express
-- Zod para validação de dados
-- Prisma ORM
-- PostgreSQL
-
-Consulte [Contexto do projeto](./CONTEXTO_PROJETO.md) para a arquitetura atual, validações, middlewares, modelagem do banco e versões das dependências. A referência de rotas, parâmetros e exemplos de requisição está em [endpoints.md](./endpoints.md).
-
-## Começando
-
-### Pré-requisitos
+## Requisitos
 
 - Node.js e npm
-- PostgreSQL, para validar o schema e executar migrações do banco
+- PostgreSQL
+- Conta e credenciais do Cloudinary para upload de imagens
 
-### Configurar o ambiente
+## Como executar
 
-No terminal, acesse a pasta `backend` e instale as dependências:
+A API e a interface são iniciadas em terminais separados.
+
+### 1. Backend
 
 ```bash
 cd backend
 npm install
 ```
 
-Crie o arquivo local `.env` a partir do exemplo. No Windows PowerShell:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-No macOS ou Linux:
+Crie `backend/.env` a partir do exemplo:
 
 ```bash
 cp .env.example .env
 ```
 
-Edite `backend/.env` e informe os dados da sua instância PostgreSQL em `DATABASE_URL`. Por exemplo:
+No PowerShell, use `Copy-Item .env.example .env`. Configure as variáveis:
 
 ```env
 PORT=3333
 DATABASE_URL="postgresql://USUARIO:SENHA@localhost:5432/pizzaUP?schema=public"
+JWT_SECRET="uma-chave-secreta"
+CLOUDINARY_CLOUD_NAME="seu-cloud-name"
+CLOUDINARY_API_KEY="sua-api-key"
+CLOUDINARY_API_SECRET="seu-api-secret"
 ```
 
-Crie previamente o banco `pizzaUP` no PostgreSQL ou ajuste a URL para apontar para um banco existente. O arquivo `.env` contém configuração local e não deve ser enviado ao Git; use `.env.example` como referência, sem colocar credenciais reais nele.
-
-### Validar e preparar o banco
-
-Com `DATABASE_URL` configurada e o banco criado, valide o schema Prisma:
+Crie o banco `pizzaUP` no PostgreSQL (ou ajuste `DATABASE_URL`) e aplique as migrações:
 
 ```bash
-npx prisma validate
+npx prisma migrate deploy
 ```
 
-O schema atual define os modelos `User`, `Category`, `Product`, `Order` e `Item`, incluindo suas relações. Para criar a migração inicial e aplicá-la ao banco de desenvolvimento:
-
-```bash
-npx prisma migrate dev --name init
-```
-
-### Executar o backend
-
-Ainda na pasta `backend`, inicie o servidor em modo de desenvolvimento:
+Inicie a API em modo de desenvolvimento:
 
 ```bash
 npm run dev
 ```
 
-O servidor usa a porta `3333` por padrão. Para escolher outra porta, altere `PORT` no arquivo `.env`.
+Por padrão, a API fica disponível em `http://localhost:3333`.
 
-## Estado atual
+### 2. Frontend
 
-O backend implementa cadastro e autenticação de usuários, categorias, produtos e operações de pedidos (criação, envio, finalização, exclusão e gerenciamento de itens). A busca de produtos por categoria ainda não está corretamente conectada à rota. As aplicações web, mobile e da cozinha também não estão presentes no repositório. Consulte [Contexto do projeto](./CONTEXTO_PROJETO.md) para os detalhes da implementação e limitações atuais.
+Em outro terminal:
+
+```bash
+cd frontend
+npm install
+```
+
+Crie `frontend/.env.local` com o endereço da API:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3333
+```
+
+Inicie a aplicação web:
+
+```bash
+npm run dev
+```
+
+Acesse `http://localhost:3000`. A rota inicial redireciona para a tela de login.
+
+## Scripts disponíveis
+
+| Diretório | Comando | Descrição |
+|---|---|---|
+| `backend` | `npm run dev` | Executa a API com recarga durante o desenvolvimento. |
+| `frontend` | `npm run dev` | Inicia o servidor Next.js de desenvolvimento. |
+| `frontend` | `npm run build` | Gera a versão de produção do frontend. |
+| `frontend` | `npm run start` | Inicia o frontend já compilado. |
+
+## Documentação da API
+
+A API usa autenticação Bearer JWT nas rotas protegidas. Para conhecer métodos, caminhos, parâmetros e exemplos de payload, consulte [endpoints.md](./endpoints.md). A implementação está organizada em rotas, controllers, services, middlewares e schemas de validação.
 
 ## Licença
 
-Este projeto está licenciado sob os termos da licença MIT. Consulte o arquivo [LICENSE](./LICENSE).
+Distribuído sob a licença MIT. Consulte [LICENSE](./LICENSE).
