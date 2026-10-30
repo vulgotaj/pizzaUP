@@ -85,7 +85,7 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
 
   return (
     <Dialog open={orderId !== null} onOpenChange={() => onClose()}>
-      <DialogContent className="p-6 bg-app-card text-white max-w-2xl">
+      <DialogContent className="p-6 bg-app-card text-foreground max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             Detalhe do pedido
@@ -94,25 +94,25 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <p className="text-gray-400">Carregando...</p>
+            <p className="text-muted-foreground">Carregando...</p>
           </div>
         ) : order ? (
           <div className="space-y-6">
             {/* Informações do pedido */}
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <p className="text-sm text-gray-400 mb-1">Nome da categoria</p>
+                <p className="text-sm text-muted-foreground mb-1">Nome da categoria</p>
                 <p className="text-lg font-semibold">Mesa {order.table}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-400 mb-1">Cliente</p>
+                <p className="text-sm text-muted-foreground mb-1">Cliente</p>
                 <p className="text-lg font-semibold">
                   {order.name || "Sem nome"}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-400 mb-1">Status</p>
-                <span className="inline-block px-3 py-1 bg-orange-500/20 text-orange-500 rounded-full text-xs font-medium">
+                <p className="text-sm text-muted-foreground mb-1">Status</p>
+                <span className="inline-block px-3 py-1 bg-brand-highlight/20 text-brand-highlight rounded-full text-xs font-medium">
                   Em produção
                 </span>
               </div>
@@ -135,15 +135,15 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
                             <h4 className="font-semibold text-base mb-1">
                               {item.product.name}
                             </h4>
-                            <p className="text-sm text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               {item.product.description}
                             </p>
-                            <p className="text-sm text-gray-400 mt-2">
+                            <p className="text-sm text-muted-foreground mt-2">
                               {formatPrice(item.product.price)} x {item.amount}
                             </p>
                           </div>
                           <div className="text-right ml-4">
-                            <p className="text-sm text-gray-400 mb-1">
+                            <p className="text-sm text-muted-foreground mb-1">
                               Quantidade: {item.amount}
                             </p>
                             <p className="font-semibold text-lg">
@@ -155,7 +155,7 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
                     );
                   })
                 ) : (
-                  <p className="text-gray-400 text-center py-4">
+                  <p className="text-muted-foreground text-center py-4">
                     Nenhum item no pedido
                   </p>
                 )}
@@ -166,7 +166,7 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
             <div className="border-t border-app-border pt-4">
               <div className="flex justify-between items-center">
                 <span className="text-xl font-bold">Total</span>
-                <span className="text-2xl font-bold text-brand-primary">
+                <span className="text-2xl font-bold text-brand-highlight">
                   {formatPrice(calculateTotal())}
                 </span>
               </div>
@@ -178,12 +178,12 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
           <Button
             variant="outline"
             onClick={() => onClose()}
-            className="flex-1 border-app-border hover:bg-transparent bg-transparent text-white hover:text-white"
+            className="flex-1 border-app-border hover:bg-transparent bg-transparent text-foreground hover:text-foreground"
           >
             Fechar
           </Button>
           <Button
-            className="flex-1 bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold"
+            className="flex-1 bg-brand-primary hover:bg-brand-primary/90 text-brand-primary-foreground font-semibold"
             disabled={loading}
             onClick={handleFinishOrder}
           >

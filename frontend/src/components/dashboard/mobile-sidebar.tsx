@@ -46,7 +46,7 @@ export function MobileSidebar() {
 
             <SheetContent side="left" className="w-72 p-0 bg-app-sidebar border-app-border">
               <SheetHeader className="border-b border-app-border p-6">
-                <SheetTitle className="text-xl text-white font-bold">Menu</SheetTitle>
+                <SheetTitle className="text-xl text-foreground font-bold">Menu</SheetTitle>
               </SheetHeader>
 
               <nav className="flex flex-col p-4 space-y-4">
@@ -59,8 +59,8 @@ export function MobileSidebar() {
                     href={menu.href} 
                     key={menu.title}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2 text-sm rounded-md font-medium transition-colors duration-300 text-white",
-                      isActive ? "bg-brand-primary text-white" : "hover:bg-gray-600"
+                      "flex items-center gap-3 px-3 py-2 text-sm rounded-md font-medium transition-colors duration-300 text-foreground",
+                      isActive ? "bg-brand-primary text-brand-primary-foreground" : "hover:bg-muted"
                     )}
                   >
                     <Icon className="w-5 h-5" />
@@ -75,7 +75,7 @@ export function MobileSidebar() {
                   <Button
                     type="submit"
                     variant="ghost"
-                    className="w-full justify-start gap-3 text-white hover:text-white hover:bg-transparent"
+                    className="w-full justify-start gap-3 text-foreground hover:text-foreground hover:bg-transparent"
                   > 
                     <LogOut className="w-5 h-5"/>
                     Sair
@@ -88,7 +88,7 @@ export function MobileSidebar() {
           </Sheet>
 
           <h1 className="text-lg font-bold">
-            pizza<span className="text-brand-primary">UP</span>
+            pizza<span className="text-brand-highlight">UP</span>
           </h1>
 
           <div className="w-10"></div>

@@ -17,7 +17,7 @@ export default async function Categories() {
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Categorias</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Categorias</h1>
           <p className="text-sm sm:text-base mt-1">Organize suas categorias</p>
         </div>
 
@@ -27,7 +27,7 @@ export default async function Categories() {
       {categories.length !== 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {categories.map( category => (
-            <Card key={category.id} className="bg-app-card border-app-border transition-shadow hover:shadow-md text-white">
+            <Card key={category.id} className="bg-app-card border-app-border transition-shadow hover:shadow-md text-foreground">
               <CardHeader>
                 <CardTitle className="gap-2 flex items-center text-base md:text-lg">
                   <Tags className="w-5 h-5" />
@@ -36,7 +36,7 @@ export default async function Categories() {
               </CardHeader>
 
               <CardContent>
-                <p className="text-gray-200 text-sm">{category.id}</p>
+                <p className="text-foreground text-sm">{category.id}</p>
               </CardContent>
             </Card>
           ))}

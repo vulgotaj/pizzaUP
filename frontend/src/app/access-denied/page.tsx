@@ -19,18 +19,18 @@ export default async function AccessDenied() {
   }
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-app-background">
-      <Card className="bg-app-card border-app-border text-white max-w-md w-full">
+      <Card className="bg-app-card border-app-border text-foreground max-w-md w-full">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <ShieldX className="w-16 h-16 text-brand-primary" />
+            <ShieldX className="w-16 h-16 text-brand-highlight" />
           </div>
           <CardTitle className="text-2xl font-bold">Acesso Negado</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <CardDescription className="text-gray-300 text-center">
+          <CardDescription className="text-muted-foreground text-center">
             Você não tem permissão para acessar o painel administrativo.
           </CardDescription>
-          <p className="text-sm text-gray-400 text-center">
+          <p className="text-sm text-muted-foreground text-center">
             Se você acredita que isso é um erro, por favor, consulte o
             responsável pelo sistema.
           </p>
@@ -38,7 +38,7 @@ export default async function AccessDenied() {
             <Button
               type="submit"
               variant="destructive"
-              className="w-full border-app-border text-white"
+              className="w-full border-app-border text-foreground"
             >
               <LogOut className="w-4 h-4" />
               Sair

@@ -58,12 +58,12 @@ export function Orders({ token }: OrdersProps){
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Pedidos</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pedidos</h1>
           <p className="text-sm sm:text-base mt-1">Gerencie os pedidos da cozinha</p>
         </div>
 
         <Button 
-          className="bg-brand-primary text-white hover:bg-brand-primary"
+          className="bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary"
           onClick={fetchOrders}  
         >
           <RefreshCcw className="w-5 h-5"/>
@@ -72,11 +72,11 @@ export function Orders({ token }: OrdersProps){
 
       {loading ? (
         <div>
-          <p className="text-center text-gray-300">Carregando pedidos...</p>
+          <p className="text-center text-muted-foreground">Carregando pedidos...</p>
         </div>
       ) : orders.length === 0 ? (
         <div>
-          <p className="text-center text-gray-300">
+          <p className="text-center text-muted-foreground">
             Nenhum pedido encontrado
           </p>
         </div>
@@ -85,7 +85,7 @@ export function Orders({ token }: OrdersProps){
           {orders.map( order => (
             <Card 
               key={order.id}
-              className="bg-app-card border-app-border text-white"  
+              className="bg-app-card border-app-border text-foreground"
             >
 
               <CardHeader>
@@ -104,7 +104,7 @@ export function Orders({ token }: OrdersProps){
                   {order.items && order.items.length > 0 && (
                     <div className="space-y-1">
                       {order.items.slice(0, 2).map( item => (
-                        <p key={item.id} className="text-xs sm:text-sm text-gray-300 truncate">
+                        <p key={item.id} className="text-xs sm:text-sm text-muted-foreground truncate">
                           - {item.amount}x {item.product.name}
                         </p>
                       ))}
@@ -114,8 +114,8 @@ export function Orders({ token }: OrdersProps){
 
                 <div className="flex flex-col xl:flex-row items-center justify-between pt-4 border-t border-app-border gap-3">
                   <div className="self-start">
-                    <p className="text-sm md:text-base text-gray-400">Total</p>
-                    <p className="text-base font-bold text-brand-primary">
+                    <p className="text-sm md:text-base text-muted-foreground">Total</p>
+                    <p className="text-base font-bold text-brand-highlight">
                       {formatPrice(calculateOrderTotal(order))}
                     </p>
                   </div>

@@ -27,35 +27,35 @@ export function LoginForm() {
   return(
     <Card className="bg-app-card border border-app-border w-full max-w-md mx-auto"> 
       <CardHeader>
-        <CardTitle className="text-white text-center text-3xl sm:text-4xl font-bold">
-          pizza<span className="text-brand-primary">UP</span>
+        <CardTitle className="text-foreground text-center text-3xl sm:text-4xl font-bold">
+          pizza<span className="text-brand-highlight">UP</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" action={formAction}>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-white">Email</Label>
-            <Input type="email" id="email" name="email" placeholder="Digite seu email" required className="text-white bg-app-card border border-app-border"/>
+            <Label htmlFor="email" className="text-foreground">Email</Label>
+            <Input type="email" id="email" name="email" placeholder="Digite seu email" required className="text-foreground bg-app-card border border-app-border"/>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-white">Senha</Label>
-            <Input type="password" id="password" name="password" placeholder="Digite sua senha" required minLength={3} className="text-white bg-app-card border border-app-border"/>
+            <Label htmlFor="password" className="text-foreground">Senha</Label>
+            <Input type="password" id="password" name="password" placeholder="Digite sua senha" required minLength={3} className="text-foreground bg-app-card border border-app-border"/>
           </div>
 
-          <Button type="submit" className="w-full bg-brand-primary text-white hover:bg-brand-primary">
+          <Button type="submit" className="w-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary">
             { isPending ? "Acessando conta..." : "Entrar"}
           </Button>
 
           {state?.error && (
-            <div className="text-sm text-red-500 bg-red-50 p-3 rounded-md">
+            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
               {state.error}
             </div>
           )}
 
-          <p className="text-center text-sm text-gray-100">
-            Ainda não possui uma conta? <Link href="/register" className="text-brand-primary font-semibold">Crie uma conta</Link>
+          <p className="text-center text-sm text-foreground">
+            Ainda não possui uma conta? <Link href="/register" className="text-brand-highlight font-semibold">Crie uma conta</Link>
           </p>
 
         </form>

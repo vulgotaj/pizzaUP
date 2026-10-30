@@ -35,6 +35,7 @@ export function ProductForm({ categories }: ProductFormProps) {
   const [open, setOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [priceValue, setPriceValue] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -52,12 +53,14 @@ export function ProductForm({ categories }: ProductFormProps) {
 
   async function handleCreateProduct(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setIsLoading(true);
+    setError("");
 
     if (!imageFile) {
-      setIsLoading(false);
+      setError("Selecione uma imagem para o produto.");
       return;
     }
+
+    setIsLoading(true);
 
     const formData = new FormData();
 
@@ -76,18 +79,23 @@ export function ProductForm({ categories }: ProductFormProps) {
     formData.append("category_id", selectedCategory);
     formData.append("file", imageFile);
 
-    const result = await createProductAction(formData);
+    try {
+      const result = await createProductAction(formData);
 
-    setIsLoading(false);
+      if (result.success) {
+        setOpen(false);
+        setSelectedCategory("");
+        setPriceValue("");
+        clearImage();
+        router.refresh();
+        return;
+      }
 
-    if (result.success) {
-      setOpen(false);
-      setSelectedCategory("");
-      router.refresh();
-      return;
-    } else {
-      console.log(result.error);
-      alert(result.error);
+      setError(result.error);
+    } catch {
+      setError("Não foi possível enviar o produto. Verifique sua conexão e tente novamente.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -116,9 +124,12 @@ export function ProductForm({ categories }: ProductFormProps) {
 
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
+        e.target.value = "";
+        setError("A imagem deve ter no máximo 5 MB.");
         return;
       }
 
+      setError("");
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -136,16 +147,16 @@ export function ProductForm({ categories }: ProductFormProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        {
-          <Button className="bg-brand-primary hover:bg-brand-primary font-semibold">
-            <Plus className="h-5 w-5 mr-2" />
-            Novo produto
-          </Button>
+      <DialogTrigger
+        render={
+          <Button className="bg-brand-primary hover:bg-brand-primary font-semibold" />
         }
+      >
+        <Plus className="h-5 w-5 mr-2" />
+        Novo produto
       </DialogTrigger>
 
-      <DialogContent className="p-6 bg-app-card text-white max-h-[90vh] overflow-y-auto">
+      <DialogContent className="p-6 bg-app-card text-foreground max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Criar novo produto</DialogTitle>
           <DialogDescription>Criando novo produto...</DialogDescription>
@@ -161,7 +172,7 @@ export function ProductForm({ categories }: ProductFormProps) {
               name="name"
               required
               placeholder="Digite o nome do produto..."
-              className="border-app-border bg-app-background text-white"
+              className="border-app-border bg-app-background text-foreground"
             />
           </div>
 
@@ -174,7 +185,7 @@ export function ProductForm({ categories }: ProductFormProps) {
               name="price"
               required
               placeholder="Ex: 35,00"
-              className="border-app-border bg-app-background text-white"
+              className="border-app-border bg-app-background text-foreground"
               value={priceValue}
               onChange={handlePriceChange}
             />
@@ -189,7 +200,7 @@ export function ProductForm({ categories }: ProductFormProps) {
               name="description"
               required
               placeholder="Digite a descrição do produto..."
-              className="border-app-border bg-app-background text-white min-h-25"
+              className="border-app-border bg-app-background text-foreground min-h-25"
             />
           </div>
 
@@ -202,7 +213,7 @@ export function ProductForm({ categories }: ProductFormProps) {
               onValueChange={(value) => setSelectedCategory(value ?? "")}
               required
             >
-              <SelectTrigger className="border-app-border bg-app-background text-white">
+              <SelectTrigger className="border-app-border bg-app-background text-foreground">
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent className="bg-app-card border-app-border">
@@ -210,7 +221,7 @@ export function ProductForm({ categories }: ProductFormProps) {
                   <SelectItem
                     key={category.id}
                     value={category.id}
-                    className="text-white hover:bg-transparent cursor-pointer"
+                    className="text-foreground hover:bg-transparent cursor-pointer"
                   >
                     {category.name}
                   </SelectItem>
@@ -243,7 +254,7 @@ export function ProductForm({ categories }: ProductFormProps) {
               </div>
             ) : (
               <div className="border-2 border-dashed rounded-md p-8 flex flex-col items-center justify-center">
-                <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                 <Label htmlFor="file">Clique para selecionar uma imagem</Label>
                 <Input
                   id="file"
@@ -258,10 +269,16 @@ export function ProductForm({ categories }: ProductFormProps) {
             )}
           </div>
 
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
+
           <Button
             type="submit"
             disabled={isLoading || !selectedCategory}
-            className="w-full bg-brand-primary text-white hover:bg-brand-primary disabled:opacity-50"
+            className="w-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary disabled:opacity-50"
           >
             {isLoading ? "Criando..." : "Criar produto"}
           </Button>

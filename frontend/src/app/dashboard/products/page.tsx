@@ -32,7 +32,7 @@ export default async function Products() {
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Produtos
           </h1>
           <p className="text-sm sm:text-base mt-1">Gerencie seus produtos</p>
@@ -46,7 +46,7 @@ export default async function Products() {
           {products.map((product) => (
             <Card
               key={product.id}
-              className="bg-app-card border-app-border transition-shadow hover:shadow-md text-white overflow-hidden"
+              className="bg-app-card border-app-border transition-shadow hover:shadow-md text-foreground overflow-hidden"
             >
               <div className="relative w-full h-48">
                 <Image
@@ -68,11 +68,11 @@ export default async function Products() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <p className="text-gray-300 text-sm line-clamp-2">
+                <p className="text-muted-foreground text-sm line-clamp-2">
                   {product.description}
                 </p>
                 <div className="flex items-center justify-between pt-2 border-t border-app-border">
-                  <span className="text-brand-primary font-bold text-lg">
+                  <span className="text-brand-highlight font-bold text-lg">
                     {formatPrice(product.price)}
                   </span>
                   {product.category && (
@@ -89,9 +89,9 @@ export default async function Products() {
 
       {products.length === 0 && (
         <div className="text-center py-12">
-          <Package className="w-16 h-16 mx-auto text-gray-500 mb-4" />
-          <p className="text-gray-400 text-lg">Nenhum produto cadastrado</p>
-          <p className="text-gray-500 text-sm mt-2">
+          <Package className="w-16 h-16 mx-auto text-app-subtle mb-4" />
+          <p className="text-muted-foreground text-lg">Nenhum produto cadastrado</p>
+          <p className="text-app-subtle text-sm mt-2">
             Comece adicionando seu primeiro produto
           </p>
         </div>

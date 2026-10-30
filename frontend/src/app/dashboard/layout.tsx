@@ -11,7 +11,7 @@ export default async function DashboardLayout({
   console.log("USUÁRIO LOGADO: " + user)
 
   return(
-    <div className="flex h-screen overflow-hidden text-white">
+    <div className="flex h-screen overflow-hidden text-foreground">
         {/* Desktop */}
       <Sidebar userName={user.name}/>
       

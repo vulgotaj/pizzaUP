@@ -36,10 +36,10 @@ export function Sidebar({ userName }: SidebarProps) {
     <aside className="hidden lg:flex flex-col h-screen w-64 border-r border-app-border bg-app-sidebar">
       
       <div className="border-b border-app-border p-6">
-        <h2 className="text-xl font-bold text-white">
-          pizza<span className="text-brand-primary">UP</span>
+        <h2 className="text-xl font-bold text-foreground">
+          pizza<span className="text-brand-highlight">UP</span>
         </h2>
-        <p className="text-sm text-gray-300 mt-1">Olá, {userName}</p>
+        <p className="text-sm text-muted-foreground mt-1">Olá, {userName}</p>
       </div>
 
       <nav className="flex-1 p-4 space-y-4">
@@ -53,7 +53,7 @@ export function Sidebar({ userName }: SidebarProps) {
               key={menu.title}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 text-sm rounded-md font-medium transition-colors duration-300",
-                isActive ? "bg-brand-primary text-white" : "hover:bg-gray-600"
+                isActive ? "bg-brand-primary text-brand-primary-foreground" : "hover:bg-muted"
               )}
             >
               <Icon className="w-5 h-5" />
@@ -68,7 +68,7 @@ export function Sidebar({ userName }: SidebarProps) {
           <Button
             type="submit"
             variant="ghost"
-            className="w-full justify-start gap-3 text-white hover:text-white hover:bg-transparent"
+            className="w-full justify-start gap-3 text-foreground hover:text-foreground hover:bg-transparent"
           >
             <LogOut className="w-5 h-5"/>
             Sair
