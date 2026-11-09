@@ -1,22 +1,42 @@
 import { colors, fontSize, spacing } from '../constants/theme';
-import { View, Text, KeyboardAvoidingView, ScrollView, StyleSheet, Platform } from 'react-native';
+import { View, Text, KeyboardAvoidingView, ScrollView, StyleSheet, Platform, Alert } from 'react-native';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'expo-router';
 
 export default function Login(){
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { signIn } = useAuth();
 
-  function handleLogin(){
-    alert(email + ' - ' + password);
+  async function handleLogin(){
+
+    if(!email.trim() || !password.trim()){
+      Alert.alert("Atenção", "Preencha todos os campos!");
+      return;
+    }
+
+    try{
+      setLoading(true);
+      await signIn(email, password);
+      router.replace("/(authenticated)/dashboard");
+
+    }catch(error){
+      console.log(error);
+      Alert.alert("Erro", "Ocorreu um erro ao fazer o login!");
+    }finally{
+      setLoading(false);
+    }
   }
 
   return(
     <KeyboardAvoidingView 
       style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={"padding"}
     >
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
