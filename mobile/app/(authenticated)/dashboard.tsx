@@ -42,8 +42,10 @@ export default function Dashboard(){
 
       router.push({
         pathname: "/(authenticated)/order",
-        params: { table: response.data.table, order_id: response.data.id }
+        params: { table: response.data.table.toString(), order_id: response.data.id }
       });
+
+      setTableNumber("");
     }catch(error){
       console.log(error)
       Alert.alert("Error", "Falha ao abrir mesa, tente novamente")
