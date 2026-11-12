@@ -1,4 +1,4 @@
-import { borderRadius, colors, fontSize, spacing } from '@/constants/theme';
+import { borderRadius, colors, fontSize, spacing, fonts } from '@/constants/theme';
 import { View, Text, StyleSheet, Modal, Pressable, FlatList } from 'react-native';
 import { Ionicons } from '@react-native-vector-icons/ionicons';
 import { useState } from 'react';
@@ -41,7 +41,7 @@ export function Select({
         style={styles.selectButton}
         onPress={() => setModalVisible(true)}
       >
-        <Text style={styles.selectText}>{displayText}</Text>
+        <Text style={[styles.selectText, !selectedOption && styles.placeholderText]}>{displayText}</Text>
         <Ionicons name="chevron-down" size={14} color={colors.primary}/>
       </Pressable>
 
@@ -61,8 +61,8 @@ export function Select({
               <Text style={styles.modalTitle}>
                 {label || "Selecione uma opção"}
               </Text>
-              <Pressable onPress={() => setModalVisible(false)}>
-                <Ionicons name="logo-x" color={colors.red} size={20} />
+              <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                <Ionicons name="close" color={colors.red} size={20} />
               </Pressable>
             </View>
 
@@ -91,43 +91,45 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   label: {
+    fontFamily: fonts.semibold,
     color: colors.primary,
     fontSize: fontSize.lg,
     marginBottom: spacing.sm,
-    fontWeight: "600",
   },
   selectButton: {
     backgroundColor: colors.backgroundInput,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.borderColor,
-    height: 50,
+    borderColor: colors.controlBorder,
+    minHeight: 56,
     alignItems: "center",
     justifyContent: "space-between",
     flexDirection: "row",
     paddingHorizontal: spacing.md
   },
   selectText: {
+    fontFamily: fonts.body,
     color: colors.primary,
     flex: 1,
   },
   placeholderText: {
+    fontFamily: fonts.body,
     color: colors.gray,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: colors.scrim,
     justifyContent: "center",
     alignItems: "center",
     padding: spacing.lg,
   },
   modalContent: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
     width: "100%",
     maxHeight: "70%",
     borderWidth: 1,
     borderColor: colors.borderColor,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.modal,
   },
   modalHeader: {
     flexDirection: "row",
@@ -138,10 +140,18 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.borderColor
   },
   modalTitle: {
-    color: colors.primary,
-    fontSize: fontSize.lg,
+    fontFamily: fonts.heading,
+    color: colors.brand,
+    fontSize: fontSize.xl,
+  },
+  closeButton: {
+    minWidth: 48,
+    minHeight: 48,
+    alignItems: "center",
+    justifyContent: "center",
   },
   optionItem: {
+    minHeight: 48,
     padding: spacing.md,
     flexDirection: "row",
     alignItems: "center",
@@ -150,10 +160,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   optionText: {
+    fontFamily: fonts.body,
     color: colors.primary,
   },
   optionSelected: {
-    color: colors.green,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
+    color: colors.brand,
   }
 })

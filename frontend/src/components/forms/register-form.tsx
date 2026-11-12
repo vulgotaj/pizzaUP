@@ -25,9 +25,9 @@ export function RegisterForm() {
   }, [state, router])
 
   return(
-    <Card className="bg-app-card border border-app-border w-full max-w-md mx-auto"> 
+    <Card className="bg-app-card border border-app-border py-8 w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle className="text-foreground text-center text-3xl sm:text-4xl font-bold">
+        <CardTitle className="wordmark text-center text-4xl sm:text-5xl">
           pizza<span className="text-brand-highlight">UP</span>
         </CardTitle>
       </CardHeader>
@@ -36,25 +36,26 @@ export function RegisterForm() {
 
           <div className="space-y-2">
             <Label htmlFor="name" className="text-foreground">Nome</Label>
-            <Input type="text" id="name" name="name" placeholder="Digite seu nome" required minLength={3} className="text-foreground bg-app-card border border-app-border"/>
+            <Input type="text" id="name" name="name" placeholder="Digite seu nome" required minLength={3} className="text-foreground bg-app-input border border-app-control-border"/>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email" className="text-foreground">Email</Label>
-            <Input type="email" id="email" name="email" placeholder="Digite seu email" required className="text-foreground bg-app-card border border-app-border"/>
+            <Input type="email" id="email" name="email" placeholder="Digite seu email" required className="text-foreground bg-app-input border border-app-control-border"/>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-foreground">Senha</Label>
-            <Input type="password" id="password" name="password" placeholder="Digite sua senha" required minLength={3} className="text-foreground bg-app-card border border-app-border"/>
+            <Input type="password" id="password" name="password" placeholder="Pelo menos 12 caracteres" required minLength={12} maxLength={72} autoComplete="new-password" className="text-foreground bg-app-input border border-app-control-border"/>
           </div>
 
-          <Button type="submit" className="w-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary">
-            { isPending ? "Criando conta..." : "Criar conta"}
+          <Button type="submit" disabled={isPending} className="w-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-hover active:bg-brand-pressed">
+            { isPending ? "Criando acesso..." : "Cadastrar atendente"}
           </Button>
 
+          {state?.error && <p role="alert" className="text-sm text-destructive">{state.error}</p>}
           <p className="text-center text-sm text-foreground">
-            Já tem uma conta? <Link href="/login" className="text-brand-highlight font-semibold">Faça o login</Link>
+            <Link href="/dashboard" className="text-brand-highlight font-semibold">Voltar ao dashboard</Link>
           </p>
 
         </form>

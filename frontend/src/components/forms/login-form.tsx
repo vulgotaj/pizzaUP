@@ -10,7 +10,6 @@ import {
 import { Label } from '../ui/label'
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import Link from 'next/link'
 import { loginAction } from '@/actions/auth';
 import { useRouter } from 'next/navigation';
 
@@ -25,9 +24,9 @@ export function LoginForm() {
   }, [state, router])
 
   return(
-    <Card className="bg-app-card border border-app-border w-full max-w-md mx-auto"> 
+    <Card className="bg-app-card border border-app-border py-8 w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle className="text-foreground text-center text-3xl sm:text-4xl font-bold">
+        <CardTitle className="wordmark text-center text-4xl sm:text-5xl">
           pizza<span className="text-brand-highlight">UP</span>
         </CardTitle>
       </CardHeader>
@@ -36,15 +35,15 @@ export function LoginForm() {
 
           <div className="space-y-2">
             <Label htmlFor="email" className="text-foreground">Email</Label>
-            <Input type="email" id="email" name="email" placeholder="Digite seu email" required className="text-foreground bg-app-card border border-app-border"/>
+            <Input type="email" id="email" name="email" placeholder="Digite seu email" required className="text-foreground bg-app-input border border-app-control-border"/>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-foreground">Senha</Label>
-            <Input type="password" id="password" name="password" placeholder="Digite sua senha" required minLength={3} className="text-foreground bg-app-card border border-app-border"/>
+            <Input type="password" id="password" name="password" placeholder="Digite sua senha" required minLength={3} className="text-foreground bg-app-input border border-app-control-border"/>
           </div>
 
-          <Button type="submit" className="w-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary">
+          <Button type="submit" className="w-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-hover active:bg-brand-pressed">
             { isPending ? "Acessando conta..." : "Entrar"}
           </Button>
 
@@ -55,7 +54,7 @@ export function LoginForm() {
           )}
 
           <p className="text-center text-sm text-foreground">
-            Ainda não possui uma conta? <Link href="/register" className="text-brand-highlight font-semibold">Crie uma conta</Link>
+            Solicite seu acesso à administração da pizzaria.
           </p>
 
         </form>

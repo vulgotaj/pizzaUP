@@ -1,6 +1,8 @@
 import prismaClient from "../../prisma";
 import cloudinary from "../../config/cloudinary";
 import { Readable } from "node:stream";
+import { AppError } from '../../errors/AppError';
+import { randomUUID } from 'node:crypto';
 
 interface CreateProductServiceProps{
   name: string;
@@ -18,7 +20,7 @@ class CreateProductService{
     description,
     category_id,
     imageBuffer,
-    imageName,
+    imageName: _imageName,
   }: CreateProductServiceProps){
 
     const categoryExists = await prismaClient.category.findFirst({
@@ -28,7 +30,7 @@ class CreateProductService{
     })
 
     if(!categoryExists){
-      throw new Error("Categoria não encontrada")
+      throw new AppError("Categoria não encontrada", 404)
     }
 
     let bannerUrl = ""
@@ -38,7 +40,7 @@ class CreateProductService{
         const uploadStream = cloudinary.uploader.upload_stream({
           folder: "products",
           resource_type: "image",
-          public_id: `${Date.now()}-${imageName.split(".")[0]}`
+          public_id: randomUUID()
         }, (error, result) => {
           if(error) reject(error);
           else resolve(result);

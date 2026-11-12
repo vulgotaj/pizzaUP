@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
 import { CreateProductService } from '../../services/product/CreateProductService';
+import { AppError } from '../../errors/AppError';
 
 class CreateProductController{
   async handle(req: Request, res: Response){
     const {name, price, description, category_id} = req.body;
 
     if(!req.file){
-      throw new Error("A imagem do produto é obrigatória!")
+      throw new AppError("A imagem do produto é obrigatória!")
     }
 
     const createProduct = new CreateProductService();

@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useState } from 'react';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
-import { colors, fontSize, spacing, borderRadius } from '../../constants/theme';
+import { colors, fontSize, spacing, borderRadius, fonts } from '@/constants/theme';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import api from "@/services/api";
@@ -26,9 +26,10 @@ export default function Dashboard(){
       return;
     }
 
-    const table = parseInt(tableNumber)
+    if (loading) return;
+    const table = Number(tableNumber)
 
-    if(isNaN(table) || table <= 0){
+    if(!Number.isInteger(table) || table <= 0 || table > 10000){
       Alert.alert("Atenção", "Digite um número de mesa válido.")
       return;
     }
@@ -56,7 +57,7 @@ export default function Dashboard(){
 
   return(
     <View style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
@@ -67,7 +68,7 @@ export default function Dashboard(){
           keyboardShouldPersistTaps="handled"
         >
           <View style={[styles.header, { paddingTop: insets.top + 24 }]}>
-            <TouchableOpacity style={styles.signOutButton}>
+            <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
               <Text style={styles.signOutText}>Sair</Text>
             </TouchableOpacity>
           </View>
@@ -90,7 +91,7 @@ export default function Dashboard(){
               keyboardType="numeric"
             />
 
-            <Button title="Abrir mesa" onPress={handleOpenTable} />
+            <Button title="Abrir mesa" onPress={handleOpenTable} loading={loading} />
 
           </View>
         </ScrollView>
@@ -117,13 +118,16 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
   },
   signOutButton: {
-    backgroundColor: colors.red,
+    backgroundColor: colors.dangerBackground,
+    minHeight: 44,
+    justifyContent: "center",
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
   },
   signOutText: {
-    color: colors.primary,
+    fontFamily: fonts.semibold,
+    color: colors.red,
     fontSize: fontSize.md
   },
   content: {
@@ -136,16 +140,20 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl
   },
   logoText: {
-    fontSize: 34,
-    fontWeight: "bold",
-    color: colors.primary,
+    fontFamily: fonts.wordmark,
+    fontSize: 48,
+    letterSpacing: -2,
+    color: colors.brand,
   },
   logoBrand: {
+    textDecorationLine: "underline",
+    textDecorationColor: colors.action,
     color: colors.brand,
   },
   title: {
-    fontSize: fontSize.xl,
-    color: colors.primary,
+    fontFamily: fonts.heading,
+    fontSize: fontSize.xxl,
+    color: colors.brand,
     textAlign: "center",
     marginBottom: spacing.md
   },

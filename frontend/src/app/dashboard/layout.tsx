@@ -8,7 +8,6 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }){
   const user = await requiredAdmin();
-  console.log("USUÁRIO LOGADO: " + user)
 
   return(
     <div className="flex h-screen overflow-hidden text-foreground">

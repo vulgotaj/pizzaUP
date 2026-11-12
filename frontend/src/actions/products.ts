@@ -1,84 +1,31 @@
-"use server";
-
-import { getToken } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
-import { apiClient } from "@/lib/api";
+'use server';
+import { requireAdminToken } from '@/lib/auth';
+import { revalidatePath } from 'next/cache';
+import { apiClient } from '@/lib/api';
 
 export async function createProductAction(formData: FormData) {
+  const token = await requireAdminToken();
   try {
-    const token = await getToken();
-
-    if (!token) {
-      return { success: false, error: "Erro ao criar produto" };
+    const body = new FormData();
+    for (const field of ['name', 'price', 'description', 'category_id', 'file']) {
+      const value = formData.get(field);
+      if (value !== null) body.append(field, value);
     }
-
-    // Criar um FormData para enviar multipart/form-data
-    const apiFormData = new FormData();
-
-    const name = formData.get("name");
-    const price = formData.get("price");
-    const description = formData.get("description");
-    const category_id = formData.get("category_id");
-    const file = formData.get("file");
-
-    if (name) apiFormData.append("name", name);
-    if (price) apiFormData.append("price", price);
-    if (description) apiFormData.append("description", description);
-    if (category_id) apiFormData.append("category_id", category_id);
-    if (file) apiFormData.append("file", file);
-
-    // Para FormData, precisamos fazer a requisição diretamente
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: apiFormData,
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      return { success: false, error: error.error || "Erro ao criar produto" };
-    }
-
-    await response.json();
-
-    revalidatePath("/dashboard/products");
-
-    return { success: true, error: "" };
+    await apiClient('/product', { method: 'POST', body, token });
+    revalidatePath('/dashboard/products');
+    return { success: true, error: '' };
   } catch (error) {
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-
-    return { success: false, error: "Erro ao criar produto" };
+    return { success: false, error: error instanceof Error ? error.message : 'Erro ao criar produto.' };
   }
 }
-
-export async function deleteProductAction(productId: string){
-  try{
-    if(!productId){
-      return { success: false, error: "Falha ao deletar produto" }
-    }
-
-    const token = await getToken();
-  
-    if(!token){
-      return { success: false, error: "Falha ao deletar produto" }
-    }
-
-    await apiClient(`/product?product_id=${productId}`, {
-      method: "DELETE",
-      token: token
-    })
-
-    revalidatePath("/dashboard/products")
-    return { success: true, error: "" }
-    }catch(error){
-      if (error instanceof Error) {
-        return { success: false, error: error.message }
-      }
-
-      return { success: false, error: "Falha ao deletar produto" }
-    }
+export async function deleteProductAction(productId: string) {
+  const token = await requireAdminToken();
+  if (!productId) return { success: false, error: 'Produto inválido.' };
+  try {
+    await apiClient(`/product?product_id=${encodeURIComponent(productId)}`, { method: 'DELETE', token });
+    revalidatePath('/dashboard/products');
+    return { success: true, error: '' };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Erro ao arquivar produto.' };
+  }
 }

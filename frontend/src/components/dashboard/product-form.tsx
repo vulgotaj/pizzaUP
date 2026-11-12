@@ -149,7 +149,7 @@ export function ProductForm({ categories }: ProductFormProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="bg-brand-primary hover:bg-brand-primary font-semibold" />
+          <Button className="bg-brand-primary hover:bg-brand-hover active:bg-brand-pressed font-semibold" />
         }
       >
         <Plus className="h-5 w-5 mr-2" />
@@ -172,7 +172,7 @@ export function ProductForm({ categories }: ProductFormProps) {
               name="name"
               required
               placeholder="Digite o nome do produto..."
-              className="border-app-border bg-app-background text-foreground"
+              className="border-app-control-border bg-app-input text-foreground"
             />
           </div>
 
@@ -185,7 +185,7 @@ export function ProductForm({ categories }: ProductFormProps) {
               name="price"
               required
               placeholder="Ex: 35,00"
-              className="border-app-border bg-app-background text-foreground"
+              className="border-app-control-border bg-app-input text-foreground"
               value={priceValue}
               onChange={handlePriceChange}
             />
@@ -200,7 +200,7 @@ export function ProductForm({ categories }: ProductFormProps) {
               name="description"
               required
               placeholder="Digite a descrição do produto..."
-              className="border-app-border bg-app-background text-foreground min-h-25"
+              className="border-app-control-border bg-app-input text-foreground min-h-25"
             />
           </div>
 
@@ -213,7 +213,7 @@ export function ProductForm({ categories }: ProductFormProps) {
               onValueChange={(value) => setSelectedCategory(value ?? "")}
               required
             >
-              <SelectTrigger className="border-app-border bg-app-background text-foreground">
+              <SelectTrigger className="border-app-control-border bg-app-input text-foreground">
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent className="bg-app-card border-app-border">
@@ -278,7 +278,7 @@ export function ProductForm({ categories }: ProductFormProps) {
           <Button
             type="submit"
             disabled={isLoading || !selectedCategory}
-            className="w-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary disabled:opacity-50"
+            className="w-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-hover active:bg-brand-pressed disabled:opacity-50"
           >
             {isLoading ? "Criando..." : "Criar produto"}
           </Button>

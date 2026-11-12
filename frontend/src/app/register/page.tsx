@@ -1,19 +1,11 @@
-import { RegisterForm } from "@/components/forms/register-form";
-import { getUser } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { RegisterForm } from '@/components/forms/register-form';
+import { requiredAdmin } from '@/lib/auth';
 
 export default async function Register() {
-  const user = await getUser();
-
-  if(user){
-    redirect("/dashboard")
-  }
-
+  await requiredAdmin();
   return (
     <div className="bg-app-background min-h-screen flex items-center justify-center px-4 py-8">
-      <div className="w-full">
-        <RegisterForm/>
-      </div>
+      <div className="w-full"><RegisterForm /></div>
     </div>
-  )
+  );
 }

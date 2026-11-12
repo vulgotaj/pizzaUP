@@ -1,41 +1,26 @@
 import axios from 'axios';
 import { API_CONFIG } from '../config/api.config';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { clearSession, getSessionToken } from './session';
 
 const api = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
-  timeout: API_CONFIG.TIMEOUT,
-  headers: {
-    contentType: 'application/json',
-  }
-})
-
-// Interceptor para adicionar o token em todas as requisições
-
-api.interceptors.request.use(
-  async (config) => {
-    const token = await AsyncStorage.getItem("@token:pizzaUP");
-
-    if(token){
-      config.headers.Authorization = `Bearer ${token}`
+  baseURL: API_CONFIG.BASE_URL, timeout: API_CONFIG.TIMEOUT,
+  headers: { 'Content-Type': 'application/json' },
+});
+api.interceptors.request.use(config => {
+  const token = getSessionToken();
+  if (token && config.url !== '/session') config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+api.interceptors.response.use(response => response, async (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    const token = getSessionToken();
+    if (error.response?.status === 401 && token && error.config?.headers.Authorization === `Bearer ${token}`) {
+      await clearSession();
     }
-
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+    const message = error.response?.data?.error;
+    // Do not propagate/log Axios config: login bodies contain the password.
+    throw new Error(typeof message === 'string' ? message : 'Não foi possível acessar a API.');
   }
-);
-
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if(error.response?.status === 401){
-      await AsyncStorage.removeItem("@token:pizzaUP");
-    }
-
-    return Promise.reject(error);
-  }
-)
-
+  throw new Error('Não foi possível acessar a API.');
+});
 export default api;

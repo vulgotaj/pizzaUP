@@ -2,7 +2,7 @@
 
 import { apiClient } from '@/lib/api';
 import { AuthResponse, User } from '@/lib/types';
-import { setToken, removeToken } from '@/lib/auth';
+import { setToken, removeToken, requireAdminToken } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 export async function registerAction(
@@ -10,6 +10,7 @@ export async function registerAction(
   formData: FormData
 ){
 
+  const token = await requireAdminToken();
   try{
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
@@ -22,13 +23,14 @@ export async function registerAction(
     }
 
     await apiClient<User>("/users", {
+      token,
       method: "POST",
       body: JSON.stringify(data)
     })
 
     
 
-    return { success: true, error: "", redirectTo: "/login" }
+    return { success: true, error: "", redirectTo: "/dashboard" }
     }catch(error){
       if(error instanceof Error){
         return { success: false, error: error.message}
@@ -57,6 +59,9 @@ export async function loginAction(
       body: JSON.stringify(data)
     })
 
+    if (response.role !== 'ADMIN') {
+      return { success: false, error: 'O dashboard é restrito à administração.' };
+    }
     await setToken(response.token);
 
     return { success: true, error: "", redirectTo: "/dashboard" }

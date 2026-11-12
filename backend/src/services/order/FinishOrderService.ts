@@ -1,44 +1,16 @@
-import prismaClient from "../../prisma";
+import { AppError } from '../../errors/AppError';
+import { withOrderLock } from './withOrderLock';
 
-interface FinishOrderProps{
-  order_id: string;
-}
-
-class FinishOrderService{
-  async execute({ order_id }: FinishOrderProps){
-    try{
-      const order = await prismaClient.order.findFirst({
-        where:{
-          id: order_id
-        }
-      })
-
-      if(!order){
-        throw new Error("Falha ao enviar pedido")
-      }
-
-      const updateOrder = await prismaClient.order.update({
-        where:{
-          id: order_id
-        },
-        data:{
-          status: true
-        },
-        select:{
-          id: true,
-          table: true,
-          name: true,
-          draft: true,
-          status: true,
-          createdAt: true
-        }
-      })
-
-      return updateOrder
-    }catch(error){
-      throw new Error("Falha ao enviar pedido")
-    }
+interface FinishOrderProps { order_id: string; }
+class FinishOrderService {
+  async execute({ order_id }: FinishOrderProps) {
+    return withOrderLock(order_id, async (tx, order) => {
+      if (order.draft || order.status) throw new AppError('Somente pedidos enviados e pendentes podem ser finalizados.', 409);
+      return tx.order.update({
+        where: { id: order_id }, data: { status: true },
+        select: { id: true, table: true, name: true, draft: true, status: true, createdAt: true },
+      });
+    });
   }
 }
-
-export { FinishOrderService }
+export { FinishOrderService };

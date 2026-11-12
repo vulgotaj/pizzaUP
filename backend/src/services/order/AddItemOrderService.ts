@@ -1,66 +1,21 @@
-import prismaClient from "../../prisma";
+import { AppError } from '../../errors/AppError';
+import { requireDraft, withOrderLock } from './withOrderLock';
 
-interface ItemProps{
-    order_id: string;
-    product_id: string;
-    amount: number;
-}
-
-class AddItemOrderService{
-  async execute({ amount, order_id, product_id }: ItemProps){
-    try{
-
-      const orderExists = await prismaClient.order.findFirst({
-        where:{
-          id: order_id
-        }
-      })
-
-      if(!orderExists){
-        throw new Error("Order não encontrada")
-      }
-
-      const productExists = await prismaClient.order.findFirst({
-        where:{
-          id: product_id,
-          disabled: false
-        }
-      })
-
-      if(!productExists){
-        throw new Error("Produto não encontrado")
-      }
-      
-      const item = await prismaClient.item.create({
-        data:{
-          order_id: order_id,
-          product_id: product_id,
-          amount: amount
+interface ItemProps { order_id: string; product_id: string; amount: number; }
+class AddItemOrderService {
+  async execute({ amount, order_id, product_id }: ItemProps) {
+    return withOrderLock(order_id, async (tx, order) => {
+      requireDraft(order);
+      const product = await tx.product.findFirst({ where: { id: product_id, disabled: false } });
+      if (!product) throw new AppError('Produto não encontrado ou arquivado.', 404);
+      return tx.item.create({
+        data: { order_id, product_id, amount },
+        select: {
+          id: true, amount: true, order_id: true, product_id: true, createdAt: true,
+          product: { select: { id: true, name: true, price: true, description: true, banner: true } },
         },
-        select:{
-          id: true,
-          amount: true,
-          order_id: true,
-          product_id: true,
-          createdAt: true,
-          product:{
-            select:{
-              id: true,
-              name: true,
-              price: true,
-              description: true,
-              banner: true
-            }
-          }
-        }
-      })
-
-      return item
-    }catch(error){
-      console.log(error);
-      throw new Error("Falha ao adicionar item no pedido")
-    }
+      });
+    });
   }
 }
-
-export { AddItemOrderService }
+export { AddItemOrderService };

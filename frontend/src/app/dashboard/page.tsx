@@ -1,10 +1,5 @@
-import { Orders } from "@/components/dashboard/orders";
-import { getToken } from "@/lib/auth";
+import { Orders } from '@/components/dashboard/orders';
 
-export default async function Dashboard(){
-  const token = await getToken();
-
-  return(
-    <Orders token={token!}/>
-  )
+export default function Dashboard() {
+  return <Orders />;
 }

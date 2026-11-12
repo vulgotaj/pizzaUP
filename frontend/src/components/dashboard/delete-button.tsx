@@ -26,7 +26,7 @@ export function DeleteButtonProduct({ productId }: DeleteButtonProps) {
   }
 
   return(
-    <Button onClick={handleDeleteProduct} variant="destructive">
+    <Button onClick={handleDeleteProduct} variant="destructive" size="icon" aria-label="Excluir produto">
       <Trash className="w-5 h-5" />
     </Button>
   )

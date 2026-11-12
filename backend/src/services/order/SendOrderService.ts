@@ -1,46 +1,19 @@
-import prismaClient from "../../prisma";
+import { AppError } from '../../errors/AppError';
+import { requireDraft, withOrderLock } from './withOrderLock';
 
-interface SendOrderProps{
-  name: string;
-  order_id: string;
-}
-
-class SendOrderService{
-  async execute({ name, order_id }: SendOrderProps){
-    try{
-      const order = await prismaClient.order.findFirst({
-        where:{
-          id: order_id
-        }
-      })
-
-      if(!order){
-        throw new Error("Falha ao enviar pedido")
+interface SendOrderProps { name: string; order_id: string; }
+class SendOrderService {
+  async execute({ name, order_id }: SendOrderProps) {
+    return withOrderLock(order_id, async (tx, order) => {
+      requireDraft(order);
+      if (await tx.item.count({ where: { order_id } }) === 0) {
+        throw new AppError('Adicione pelo menos um item antes de enviar o pedido.', 409);
       }
-
-      const updateOrder = await prismaClient.order.update({
-        where:{
-          id: order_id
-        },
-        data:{
-          draft: false,
-          name: name
-        },
-        select:{
-          id: true,
-          table: true,
-          name: true,
-          draft: true,
-          status: true,
-          createdAt: true
-        }
-      })
-
-      return updateOrder
-    }catch(error){
-      throw new Error("Falha ao enviar pedido")
-    }
+      return tx.order.update({
+        where: { id: order_id }, data: { draft: false, name },
+        select: { id: true, table: true, name: true, draft: true, status: true, createdAt: true },
+      });
+    });
   }
 }
-
-export { SendOrderService }
+export { SendOrderService };

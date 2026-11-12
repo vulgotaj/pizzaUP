@@ -41,7 +41,7 @@ export function CategoryForm(){
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="bg-brand-primary hover:bg-brand-primary font-semibold" />
+          <Button className="bg-brand-primary hover:bg-brand-hover active:bg-brand-pressed font-semibold" />
         }
       >
         <Plus className='h-5 w-5 mr-2' />
@@ -68,13 +68,13 @@ export function CategoryForm(){
               name="name"
               required
               placeholder="Digite o nome da categoria..."
-              className="border-app-border bg-app-background text-foreground"
+              className="border-app-control-border bg-app-input text-foreground"
             />
           </div>
 
           <Button
             type="submit"
-            className="w-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary"
+            className="w-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-hover active:bg-brand-pressed"
           >
             Criar categoria
           </Button>

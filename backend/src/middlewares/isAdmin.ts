@@ -1,35 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import prismaClient from '../prisma';
+import type { RequestHandler } from 'express';
 
-export const isAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const userId = req.userId;
-
-  if(!userId){
-    res.status(401).json({
-      error: "Usuário sem permissão"
-    });
+export const isAdmin: RequestHandler = (req, res, next) => {
+  if (req.userRole !== 'ADMIN') {
+    res.status(403).json({ error: 'Acesso restrito à administração.' });
     return;
   }
-
-  const user = await prismaClient.user.findFirst({
-    where:{
-      id: userId
-    }
-  }) as object & { role: string };
-
-  if(!userId){
-    res.status(401).json({
-      error: "Usuário sem permissão"
-    });
-    return;
-  }
-
-  if(user.role !== "ADMIN"){
-    res.status(401).json({
-      error: "Usuário sem permissão"
-    })
-    return;
-  }
-
   next();
-}
+};

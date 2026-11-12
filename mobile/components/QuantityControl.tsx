@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { colors, fontSize, spacing, borderRadius } from '@/constants/theme';
+import { colors, fontSize, spacing, borderRadius, fonts } from '@/constants/theme';
 
 interface QuantityControlProps{
   quantity: number;
@@ -14,7 +14,7 @@ export function QuantityControl({
 }: QuantityControlProps){
   return(
     <View style={styles.container}>
-      <Pressable style={[styles.button, quantity <= 1 && { backgroundColor: "rgba(255, 63, 75, 0.30)" }]} onPress={onDecrement}>
+      <Pressable style={[styles.button, quantity <= 1 && { backgroundColor: colors.disabledBackground }]} onPress={onDecrement}>
         <Text style={styles.buttonText}>-</Text>
       </Pressable>
       <View style={styles.quantityContainer}>
@@ -32,23 +32,32 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: spacing.md
+    gap: 0
   },
   button: {
-    backgroundColor: colors.red,
+    backgroundColor: "transparent",
+    minWidth: 48,
+    minHeight: 48,
+    borderWidth: 1,
+    borderColor: colors.controlBorder,
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
-    borderRadius: 8,
+    borderRadius: borderRadius.md,
   },
   buttonText: {
+    fontFamily: fonts.bold,
     color: colors.primary,
     fontSize: fontSize.xl,
-    fontWeight: "bold",
   },
   quantityContainer: {
-    alignSelf: "center"
+    alignSelf: "center",
+    width: 44,
+    alignItems: "center"
   },
   quantityText: {
+    fontFamily: fonts.number,
     color: colors.primary,
     fontSize: fontSize.xl,
   }

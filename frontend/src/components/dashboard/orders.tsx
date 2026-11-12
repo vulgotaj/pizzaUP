@@ -4,17 +4,13 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { EyeIcon, RefreshCcw } from "lucide-react";
 import { Order } from "@/lib/types";
-import { apiClient } from "@/lib/api";
+import { getOrdersAction } from "@/actions/orders";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { formatPrice } from "@/lib/format";
 import { OrderModal } from "./order-modal";
 
-interface OrdersProps{
-  token: string;
-}
-
-export function Orders({ token }: OrdersProps){
+export function Orders(){
 
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -22,11 +18,7 @@ export function Orders({ token }: OrdersProps){
 
   const fetchOrders = async () => {
     try{
-      const response = await apiClient<Order[]>("/orders?draft=false", {
-        method: "GET",
-        cache: "no-store",
-        token: token
-      });
+      const response = await getOrdersAction();
 
       const pendingOrders = response.filter(order => !order.status)
 
@@ -58,12 +50,14 @@ export function Orders({ token }: OrdersProps){
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pedidos</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-brand-highlight">Pedidos</h1>
           <p className="text-sm sm:text-base mt-1">Gerencie os pedidos da cozinha</p>
         </div>
 
         <Button 
-          className="bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary"
+          variant="outline"
+          size="icon"
+          aria-label="Atualizar pedidos"
           onClick={fetchOrders}  
         >
           <RefreshCcw className="w-5 h-5"/>
@@ -85,15 +79,15 @@ export function Orders({ token }: OrdersProps){
           {orders.map( order => (
             <Card 
               key={order.id}
-              className="bg-app-card border-app-border text-foreground"
+              className="order-card min-h-64 bg-app-card border-app-border text-foreground"
             >
 
               <CardHeader>
                 <div className="flex items-center justify-between gap-2">
-                  <CardTitle className="text-lg lg:text-xl font-bold">
+                  <CardTitle className="text-2xl font-semibold">
                     Mesa {order.table}
                   </CardTitle>
-                  <Badge variant="secondary" className="text-xs select-none">Produção</Badge>
+                  <Badge variant="secondary" className="status-badge text-xs select-none">Produção</Badge>
 
                 </div>
               </CardHeader>
@@ -112,17 +106,18 @@ export function Orders({ token }: OrdersProps){
                   )}
                 </div>
 
-                <div className="flex flex-col xl:flex-row items-center justify-between pt-4 border-t border-app-border gap-3">
+                <div className="flex flex-col xl:flex-row items-center justify-between pt-4 border-t receipt-divider gap-3">
                   <div className="self-start">
                     <p className="text-sm md:text-base text-muted-foreground">Total</p>
-                    <p className="text-base font-bold text-brand-highlight">
+                    <p className="price text-lg font-bold text-foreground">
                       {formatPrice(calculateOrderTotal(order))}
                     </p>
                   </div>
 
                   <Button 
                     size="sm" 
-                    className="bg-brand-primary hover:bg-brand-primary w-full xl:w-auto"
+                    variant="outline"
+                    className="w-full xl:w-auto"
                     onClick={ () => setSelectedOrder(order.id) }  
                   >
                     <EyeIcon className="w-5 h-5"/>
@@ -143,7 +138,6 @@ export function Orders({ token }: OrdersProps){
           setSelectedOrder(null);
           await fetchOrders();
         }}
-        token={token}
       />
     </div>
   )

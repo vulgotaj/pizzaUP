@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api";
+import { getOrderDetailAction } from "@/actions/orders";
 import { Order } from "@/lib/types";
 import { useEffect, useState } from "react";
 import {
@@ -16,10 +16,9 @@ import { useRouter } from "next/navigation";
 interface OrderModalProps {
   orderId: string | null;
   onClose: () => Promise<void>;
-  token: string;
 }
 
-export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
+export function OrderModal({ onClose, orderId }: OrderModalProps) {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -33,13 +32,7 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
     try {
       setLoading(true);
 
-      const response = await apiClient<Order>(
-        `/order/detail?order_id=${orderId}`,
-        {
-          method: "GET",
-          token: token,
-        }
-      );
+      const response = await getOrderDetailAction(orderId);
 
       // RETORNO DETALHE DA ORDER
       setOrder(response);
@@ -85,7 +78,7 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
 
   return (
     <Dialog open={orderId !== null} onOpenChange={() => onClose()}>
-      <DialogContent className="p-6 bg-app-card text-foreground max-w-2xl">
+      <DialogContent className="p-6 bg-app-card text-foreground [--dialog-width:42rem] max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             Detalhe do pedido
@@ -112,7 +105,7 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Status</p>
-                <span className="inline-block px-3 py-1 bg-brand-highlight/20 text-brand-highlight rounded-full text-xs font-medium">
+                <span className="inline-block px-3 py-1 bg-status-production-background text-status-production rounded-full text-xs font-medium">
                   Em produção
                 </span>
               </div>
@@ -130,7 +123,7 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
                         key={item.id}
                         className="bg-app-background rounded-lg p-4 border border-app-border"
                       >
-                        <div className="flex justify-between items-start">
+                        <div className="flex flex-col gap-3 sm:flex-row justify-between items-start">
                           <div className="flex-1">
                             <h4 className="font-semibold text-base mb-1">
                               {item.product.name}
@@ -142,7 +135,7 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
                               {formatPrice(item.product.price)} x {item.amount}
                             </p>
                           </div>
-                          <div className="text-right ml-4">
+                          <div className="sm:text-right sm:ml-4">
                             <p className="text-sm text-muted-foreground mb-1">
                               Quantidade: {item.amount}
                             </p>
@@ -163,10 +156,10 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
             </div>
 
             {/* Total */}
-            <div className="border-t border-app-border pt-4">
+            <div className="border-t receipt-divider pt-4">
               <div className="flex justify-between items-center">
                 <span className="text-xl font-bold">Total</span>
-                <span className="text-2xl font-bold text-brand-highlight">
+                <span className="price text-2xl font-bold text-foreground">
                   {formatPrice(calculateTotal())}
                 </span>
               </div>
@@ -183,7 +176,7 @@ export function OrderModal({ onClose, orderId, token }: OrderModalProps) {
             Fechar
           </Button>
           <Button
-            className="flex-1 bg-brand-primary hover:bg-brand-primary/90 text-brand-primary-foreground font-semibold"
+            className="flex-1 bg-brand-primary hover:bg-brand-hover active:bg-brand-pressed text-brand-primary-foreground font-semibold"
             disabled={loading}
             onClick={handleFinishOrder}
           >

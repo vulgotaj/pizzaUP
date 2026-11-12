@@ -1,5 +1,5 @@
-import { colors, fontSize, spacing } from '../constants/theme';
-import { View, Text, KeyboardAvoidingView, ScrollView, StyleSheet, Platform, Alert } from 'react-native';
+import { colors, fontSize, spacing, fonts } from '../constants/theme';
+import { View, Text, KeyboardAvoidingView, ScrollView, StyleSheet, Alert } from 'react-native';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import { useState } from 'react';
@@ -14,6 +14,7 @@ export default function Login(){
   const { signIn } = useAuth();
 
   async function handleLogin(){
+    if (loading) return;
 
     if(!email.trim() || !password.trim()){
       Alert.alert("Atenção", "Preencha todos os campos!");
@@ -54,7 +55,7 @@ export default function Login(){
           <Input 
             label="Email" 
             placeholder="Digite seu email..." 
-            placeholderTextColor={colors.primary}
+            placeholderTextColor={colors.gray}
             value={email}
             onChangeText={setEmail}
           />
@@ -62,7 +63,7 @@ export default function Login(){
           <Input 
             label="Senha" 
             placeholder="Digite sua senha..." 
-            placeholderTextColor={colors.primary}
+            placeholderTextColor={colors.gray}
             secureTextEntry
             value={password}
             onChangeText={setPassword}
@@ -95,15 +96,19 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   logoText: {
-    fontSize: 34,
-    fontWeight: 'bold',
-    color: colors.primary,
+    fontFamily: fonts.wordmark,
+    fontSize: 48,
+    letterSpacing: -2,
+    color: colors.brand,
   },
   logoBrand: {
+    textDecorationLine: "underline",
+    textDecorationColor: colors.action,
     color: colors.brand,
   },
   logoSubtitle: {
-    color: colors.primary,
+    fontFamily: fonts.body,
+    color: colors.gray,
     fontSize: fontSize.lg
   },
   formContainer: {

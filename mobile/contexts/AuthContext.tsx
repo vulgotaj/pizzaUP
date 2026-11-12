@@ -1,95 +1,50 @@
-import api from "../services/api";
-import { createContext, useContext, useState, useEffect } from "react";
-import { LoginResponse, User } from "../types/index";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from '../services/api';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { LoginResponse, User } from '../types';
+import { clearSession, discardLegacySession, onSessionInvalidated, restoreSessionToken, saveSessionToken } from '../services/session';
 
-interface AuthProviderProps{
-  children: React.ReactNode;
-}
-
-interface AuthContextData{
-  user: User | null;
-  signed: boolean;
-  loading: boolean;
+interface AuthContextData {
+  user: User | null; signed: boolean; loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
-
-const AuthContext = createContext({} as AuthContextData);
-
-export function AuthProvider({ children }: AuthProviderProps){
+const AuthContext = createContext<AuthContextData | null>(null);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
-
   useEffect(() => {
-    async function loadStorageData(){
-      try{
-        const storedToken = await AsyncStorage.getItem("@token:pizzaUP");
-        const storedUser = await AsyncStorage.getItem("@user:pizzaUP");
-
-        if(storedToken && storedUser){
-          setUser(JSON.parse(storedUser))
+    let active = true;
+    const unsubscribe = onSessionInvalidated(() => { if (active) setUser(null); });
+    async function restore() {
+      try {
+        await discardLegacySession();
+        if (await restoreSessionToken()) {
+          const response = await api.get<User>('/me');
+          if (active) setUser(response.data);
         }
-      }catch(error){
-        console.log(error);
-      }finally{
-        setLoading(false);
-      }
+      } catch {
+        await clearSession().catch(() => {});
+      } finally { if (active) setLoading(false); }
     }
-
-    loadStorageData();
-  }, [])
-
-  async function signIn(email: string, password: string){
-    try{
-      const response = await api.post<LoginResponse>("/session", {
-        email: email,
-        password: password
-      })
-
-      const { token, ...userData } = response.data;
-
-      await AsyncStorage.setItem("@token:pizzaUP", token);
-      await AsyncStorage.setItem("@user:pizzaUP", JSON.stringify(userData));
-
-      setUser(userData);
-    }catch(error: any){
-      if(error.response?.data?.error){
-        console.log(error.response?.data?.error);
-        throw error;
-      }
-
-      console.log(error);
+    void restore();
+    return () => { active = false; unsubscribe(); };
+  }, []);
+  async function signIn(email: string, password: string) {
+    const { data } = await api.post<LoginResponse>('/session', { email: email.trim(), password });
+    try {
+      await saveSessionToken(data.token);
+      const response = await api.get<User>('/me');
+      setUser(response.data);
+    } catch (error) {
+      await clearSession().catch(() => {});
       throw error;
     }
   }
-
-  async function signOut(){
-    await AsyncStorage.removeItem("@token:pizzaUP");
-    await AsyncStorage.removeItem("@user:pizzaUP");
-
-    setUser(null);
-  }
-
-  return(
-    <AuthContext value={{
-      user,
-      signed: !!user,
-      loading,
-      signIn,
-      signOut
-    }}>
-      {children}
-    </AuthContext>
-  )
+  async function signOut() { await clearSession(); }
+  return <AuthContext value={{ user, signed: !!user, loading, signIn, signOut }}>{children}</AuthContext>;
 }
-
-export function useAuth(){
+export function useAuth() {
   const context = useContext(AuthContext);
-
-  if(!context){
-    throw new Error("Contexto não foi encontrado!")
-  }
-
+  if (!context) throw new Error('AuthProvider não encontrado.');
   return context;
 }

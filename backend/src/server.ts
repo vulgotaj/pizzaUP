@@ -1,29 +1,15 @@
-import cors from 'cors';
-import "dotenv/config";
-import express, { Request, Response } from 'express';
-import { router } from './routes'
+import { createApp } from './app';
+import { env } from './config/env';
+import prismaClient from './prisma';
 
-const app = express();
-
-app.use(express.json());
-app.use(cors());
-app.use(router);
-
-app.use((error: Error, _: Request, res: Response, next: Function) => {
-
-  if(error instanceof Error){
-    return res.status(400).json({
-      error: error.message
-    })
-  }
-
-  return res.status(500).json({
-    error: "Internal server error"
-  })
-})
-
-const PORT = process.env.PORT! || 3333;
-
-app.listen(PORT, () => {
-  console.log(`SERVIDOR RODANDO NA PORTA: ${PORT}`)
-})
+const server = createApp().listen(env.PORT, () => {
+  console.log(`SERVIDOR RODANDO NA PORTA: ${env.PORT}`);
+});
+for (const signal of ['SIGTERM', 'SIGINT'] as const) {
+  process.once(signal, () => {
+    const timeout = setTimeout(() => process.exit(1), 10_000).unref();
+    server.close(() => {
+      void prismaClient.$disconnect().finally(() => { clearTimeout(timeout); process.exit(0); });
+    });
+  });
+}

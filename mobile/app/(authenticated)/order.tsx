@@ -1,9 +1,9 @@
-import { View, Text, ActivityIndicator, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
-import { Category, Product, Item } from '@/types';
+import { Category, Product, Item, Order as OrderData } from '@/types';
 import api from '@/services/api';
-import { colors, spacing, fontSize } from '@/constants/theme';
+import { colors, spacing, fontSize, fonts } from '@/constants/theme';
 import { Ionicons } from '@react-native-vector-icons/ionicons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Select } from '@/components/Select';
@@ -22,60 +22,55 @@ export default function Order() {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [products, setProducts] = useState<Product[]>([]);
+  const [catalog, setCatalog] = useState<{ categoryId: string; products: Product[] }>({ categoryId: "", products: [] });
   const [selectedProduct, setSelectedProduct] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const [loadingProducts, setLoadingProducts] = useState(true);
-  const [loadingAddItem, setLoadingAddItem] = useState(true);
+  const products = catalog.categoryId === selectedCategory ? catalog.products : [];
+  const loadingProducts = !!selectedCategory && catalog.categoryId !== selectedCategory;
+  const [loadingAddItem, setLoadingAddItem] = useState(false);
   const [items, setItems] = useState<Item[]>([])
 
   useEffect(() => {
-    async function loadDataCategories(){
-      await loadCategories();
+    let active = true;
+    async function load() {
+      try {
+        const [categoryResponse, orderResponse] = await Promise.all([
+          api.get<Category[]>("/category"),
+          api.get<OrderData>("/order/detail", { params: { order_id } }),
+        ]);
+        if (active) {
+          setCategories(categoryResponse.data);
+          setItems(orderResponse.data.items ?? []);
+        }
+      } catch {
+        if (active) Alert.alert("Atenção", "Não foi possível carregar o pedido.");
+      } finally { if (active) setLoadingCategories(false); }
     }
-
-    loadDataCategories()
-  }, []);
+    void load();
+    return () => { active = false; };
+  }, [order_id]);
 
   useEffect(() => {
-
-    if(selectedCategory){
-      loadProducts(selectedCategory);
-    }else{
-      setProducts([])
-      setSelectedCategory("");
+    if (!selectedCategory) return;
+    let active = true;
+    async function load() {
+      try {
+        const { data } = await api.get<Product[]>("/category/product", { params: { category_id: selectedCategory } });
+        if (active) setCatalog({ categoryId: selectedCategory, products: data });
+      } catch {
+        if (active) {
+          setCatalog({ categoryId: selectedCategory, products: [] });
+          Alert.alert("Atenção", "Não foi possível carregar os produtos.");
+        }
+      }
     }
-
-  }, [selectedCategory])
-
-  async function loadCategories(){
-    try{
-      const response = await api.get<Category[]>("/category")
-      setCategories(response.data)
-    }catch(error){
-      console.log(error)
-    }finally{
-      setLoadingCategories(false)
-    }
-  }
-
-  async function loadProducts(categoryId: string){
-    try{
-      setLoadingProducts(true);
-      const response = await api.get<Product[]>("/category/product",{
-        params: { category_id: categoryId },
-      });
-
-      setProducts(response.data);
-    }catch(error){
-      console.log(error);
-    }finally{
-      setLoadingProducts(false)
-    }
-  }
+    void load();
+    return () => { active = false; };
+  }, [selectedCategory]);
 
   async function handleAddItem(){
+    if (loadingAddItem || !products.some(product => product.id === selectedProduct)) return;
     try{
       setLoadingAddItem(true)
 
@@ -85,7 +80,7 @@ export default function Order() {
         amount: quantity
       })
 
-      setItems([...items, response.data]);
+      setItems(current => [...current, response.data]);
 
       setSelectedCategory("")
       setSelectedProduct("")
@@ -95,6 +90,34 @@ export default function Order() {
     }finally{
       setLoadingAddItem(false);
     }
+  }
+
+  async function handleRemoveItem(item_id: string){
+    try{
+      await api.delete("/order/remove", {
+        params: {
+          item_id: item_id
+        }
+      });
+
+      const updatedItems = items.filter(item => item.id !== item_id)
+      setItems(updatedItems);
+      Alert.alert("Item removido", "Seu item foi removido da mesa!")
+    }catch(error){
+      console.log(error);
+      Alert.alert("Atenção!", "Erro ao remover item")
+    }
+  }
+
+  async function handleAdvance(){
+    if(items.length === 0){
+      return
+    }
+
+    router.push({
+      pathname: "/(authenticated)/finish",
+      params: { order_id: order_id, table: table }
+    })
   }
 
   if(loadingCategories){
@@ -108,7 +131,7 @@ export default function Order() {
   return (
     <View style={styles.container}>
 
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}> 
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Mesa {table}</Text>
 
@@ -116,13 +139,16 @@ export default function Order() {
             style={styles.closeButton}
             onPress={() => router.back()}  
           >
-            <Ionicons name="trash" size={20} color={colors.primary}/>
+            <Ionicons name="arrow-back" size={20} color={colors.red}/>
           </Pressable>
         </View>
       </View>
 
 
-      <ScrollView style={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollContent}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+      >
         <Select 
           label="Categorias"
           placeholder="Selecione a categoria..."
@@ -131,14 +157,14 @@ export default function Order() {
             value: category.id
           }))}
           selectedValue={selectedCategory}
-          onValueChange={setSelectedCategory}
+          onValueChange={value => { setSelectedCategory(value); setSelectedProduct(""); }}
 
         />
 
         {loadingProducts ? (
           <ActivityIndicator size="small" color={colors.brand} />
         ) : (
-          selectedCategory && <Select 
+          !!selectedCategory && <Select
             placeholder="Selecione um produto..." 
             options={products.map( product => ({
               label: product.name,
@@ -149,12 +175,12 @@ export default function Order() {
           />
         )}
 
-        {selectedProduct && (
+        {!!selectedProduct && (
           <View style={styles.quantitySection}>
             <Text style={styles.quantityLabel}>Quantidade:</Text>
             <QuantityControl 
               quantity={quantity} 
-              onIncrement={ () => setQuantity((quantity) => quantity + 1) }
+              onIncrement={ () => setQuantity((quantity) => Math.min(999, quantity + 1)) }
               onDecrement={ () => {
                 if(quantity <= 1){
                   setQuantity(1)
@@ -167,11 +193,12 @@ export default function Order() {
           </View>
         )}
 
-        {selectedProduct && (
+        {!!selectedProduct && (
           <Button
             title="Adicionar"
             onPress={handleAddItem}
             variant="secondary"
+            loading={loadingAddItem}
           />
         )}
 
@@ -182,12 +209,18 @@ export default function Order() {
               <OrderItem
                 item={item}
                 key={item.id}
-                onRemove={async () => {}}
+                onRemove={handleRemoveItem}
               />
             ))}
           </View>
         )}
 
+
+        {items.length > 0 && (
+          <View style={styles.footer}>
+            <Button title="Avançar" onPress={handleAdvance} />
+          </View>
+        )}
       </ScrollView>
     </View>
   )
@@ -217,18 +250,22 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   headerTitle: {
-    fontSize: fontSize.xl,
-    color: colors.primary,
-    fontWeight: "600"
+    fontFamily: fonts.heading,
+    fontSize: fontSize.xxl,
+    color: colors.brand,
   },
   closeButton: {
-    backgroundColor: colors.red,
+    backgroundColor: colors.dangerBackground,
+    minWidth: 48,
+    minHeight: 48,
+    alignItems: "center",
+    justifyContent: "center",
     padding: spacing.sm,
     borderRadius: 8
   },
   scrollContent: {
     padding: spacing.lg,
-    gap: 14,
+    gap: spacing.md,
   },
   quantitySection: {
     flexDirection: "row",
@@ -237,17 +274,20 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   quantityLabel: {
+    fontFamily: fonts.bold,
     color: colors.primary,
     fontSize: fontSize.lg,
-    fontWeight: "bold",
   },
   itemsSection: {
     marginTop: spacing.xl,
     gap: spacing.md,
   },
   itemsTitle: {
+    fontFamily: fonts.heading,
     color: colors.primary,
-    fontWeight: "bold",
     fontSize: fontSize.lg,
+  },
+  footer: {
+    paddingTop: 24,
   }
 })

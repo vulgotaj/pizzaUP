@@ -1,32 +1,31 @@
-import { Request, Response, NextFunction } from 'express';
+import type { RequestHandler } from 'express';
 import { verify } from 'jsonwebtoken';
+import prismaClient from '../prisma';
+import { env, JWT_AUDIENCE, JWT_ISSUER } from '../config/env';
 
-interface PayLoad{
-  sub: string;
-}
-
-export function isAuthenticated(req: Request, res: Response, next: NextFunction){
-  
-  const authToken = req.headers.authorization
-
-  if(!authToken){
-    return res.status(401).json({
-      error: "Token não informado!"
-    })
+export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  const match = /^Bearer ([^\s]+)$/i.exec(req.headers.authorization ?? '');
+  if (!match?.[1]) {
+    res.status(401).json({ error: 'Autenticação necessária.' });
+    return;
   }
-
-  const [, token] = authToken.split(" ")
-  
-  try{
-    const { sub } = verify(token!, process.env.JWT_SECRET as string) as PayLoad
-
-    req.userId = sub;
-    
-    return next();  
-  }catch(error){
-    res.status(401).json({
-      error:"Token inválido!"
-    })
+  let subject: string;
+  try {
+    const payload = verify(match[1], env.JWT_SECRET, { algorithms: ['HS256'], issuer: JWT_ISSUER, audience: JWT_AUDIENCE });
+    if (typeof payload === 'string' || typeof payload.sub !== 'string' || !payload.sub || typeof payload.exp !== 'number') {
+      throw new Error('Invalid token claims');
+    }
+    subject = payload.sub;
+  } catch {
+    res.status(401).json({ error: 'Sessão inválida ou expirada.' });
+    return;
   }
-
-}
+  const user = await prismaClient.user.findUnique({ where: { id: subject }, select: { id: true, role: true } });
+  if (!user) {
+    res.status(401).json({ error: 'Sessão inválida ou expirada.' });
+    return;
+  }
+  req.userId = user.id;
+  req.userRole = user.role;
+  next();
+};

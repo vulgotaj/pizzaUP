@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, StyleSheet, TouchableOpacityProps, ActivityIndicator } from 'react-native';
-import { colors, fontSize, spacing, borderRadius } from '../constants/theme';
+import { Text, TouchableOpacity, StyleSheet, TouchableOpacityProps, ActivityIndicator } from 'react-native';
+import { colors, fontSize, spacing, borderRadius, fonts } from '@/constants/theme';
 
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
@@ -15,22 +15,25 @@ export function Button({
   style,  
   ...props }: ButtonProps) {
 
-  const backgroundColor = variant === "primary" ? colors.green : colors.brand;
+  const backgroundColor = variant === "primary" ? colors.action : "transparent";
 
   return (
     <TouchableOpacity
+      disabled={disabled || loading}
+      accessibilityState={{ disabled: !!disabled || loading, busy: loading }}
       style={[
         { backgroundColor },
         styles.button,
+        variant === "secondary" && styles.secondary,
         (disabled || loading) && styles.buttonDisabled,
         style,
       ]}
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={colors.background} />
+        <ActivityIndicator color={colors.onAction} />
       ) : (
-        <Text style={styles.buttonText}>{title}</Text>
+        <Text style={[styles.buttonText, variant === "secondary" && { color: colors.brand }]}>{title}</Text>
       )}
     </TouchableOpacity>
   )
@@ -39,18 +42,22 @@ export function Button({
 const styles = StyleSheet.create({
   button: {
     width: "100%",
-    height: 50,
+    minHeight: 52,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.lg,
   },
+  secondary: {
+    borderWidth: 1,
+    borderColor: colors.controlBorder,
+  },
   buttonDisabled: {
-    opacity: 0.6,
+    backgroundColor: colors.disabledBackground,
   },
   buttonText: {
-    color: colors.background,
+    fontFamily: fonts.semibold,
+    color: colors.onAction,
     fontSize: fontSize.lg,
-    fontWeight: "600",
   }
 })

@@ -12,6 +12,7 @@ interface SidebarProps {
 }
 
 const menuItems = [
+  { title: "Cadastrar atendente", href: "/register", icon: Tags },
   {
     title: "Pedidos",
     href: "/dashboard",
@@ -36,7 +37,7 @@ export function Sidebar({ userName }: SidebarProps) {
     <aside className="hidden lg:flex flex-col h-screen w-64 border-r border-app-border bg-app-sidebar">
       
       <div className="border-b border-app-border p-6">
-        <h2 className="text-xl font-bold text-foreground">
+        <h2 className="wordmark text-3xl">
           pizza<span className="text-brand-highlight">UP</span>
         </h2>
         <p className="text-sm text-muted-foreground mt-1">Olá, {userName}</p>
@@ -52,8 +53,8 @@ export function Sidebar({ userName }: SidebarProps) {
               href={menu.href} 
               key={menu.title}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 text-sm rounded-md font-medium transition-colors duration-300",
-                isActive ? "bg-brand-primary text-brand-primary-foreground" : "hover:bg-muted"
+                "flex items-center gap-3 min-h-12 px-4 py-3 text-sm rounded-md font-medium transition-colors duration-150",
+                isActive ? "bg-brand-primary text-brand-primary-foreground shadow-[inset_3px_0_var(--color-brand-highlight)]" : "hover:bg-muted"
               )}
             >
               <Icon className="w-5 h-5" />

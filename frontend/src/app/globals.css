@@ -1,26 +1,32 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import "../styles/shadcn.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-brand-primary: #C5522C; /* Laranja de forno para acoes */
-  --color-brand-primary-foreground: #FFFFFF;
-  --color-brand-highlight: #F49A72; /* Destaques e links sobre fundos escuros */
-  --color-app-background: #191614;
-  --color-app-card: #26211D;
-  --color-app-border: #443A32;
-  --color-app-sidebar: #12100E;
-  --color-app-subtle: #A89B90;
+  --color-brand-primary: #EDBC4C;
+  --color-brand-primary-foreground: #452C24;
+  --color-brand-hover: #E3AE3E;
+  --color-brand-pressed: #D39B2D;
+  --color-brand-highlight: #78382B;
+  --color-app-background: #F7EED8;
+  --color-app-card: #FFF9EA;
+  --color-app-border: #E4D5B8;
+  --color-app-control-border: #8D765E;
+  --color-app-input: #F0E3C7;
+  --color-app-sidebar: #F7EED8;
+  --color-app-subtle: #786054;
+  --color-status-production: #755113;
+  --color-status-production-background: #F3DFAB;
+  --color-danger-background: #FBE7DF;
 }
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-dm-sans);
+  --font-mono: var(--font-ibm-plex-mono);
+  --font-heading: var(--font-fraunces);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -50,96 +56,81 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: 0.375rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
+  --radius-4xl: 1.5rem;
 }
-
-:root {
+:root, .dark {
+  color-scheme: light;
   --background: var(--color-app-background);
-  --foreground: #FAF6F2;
+  --foreground: #452C24;
   --card: var(--color-app-card);
   --card-foreground: var(--foreground);
   --popover: var(--color-app-card);
   --popover-foreground: var(--foreground);
   --primary: var(--color-brand-primary);
   --primary-foreground: var(--color-brand-primary-foreground);
-  --secondary: #392D25;
-  --secondary-foreground: var(--color-brand-highlight);
-  --muted: #302923;
-  --muted-foreground: #C1B5AA;
-  --accent: #392D25;
-  --accent-foreground: var(--foreground);
-  --destructive: #F29186;
+  --secondary: var(--color-status-production-background);
+  --secondary-foreground: var(--color-status-production);
+  --muted: var(--color-app-input);
+  --muted-foreground: var(--color-app-subtle);
+  --accent: var(--color-app-input);
+  --accent-foreground: var(--color-brand-highlight);
+  --destructive: #AB302F;
   --border: var(--color-app-border);
-  --input: var(--color-app-border);
+  --input: var(--color-app-control-border);
   --ring: var(--color-brand-highlight);
-  --chart-1: #F49A72;
-  --chart-2: #E9B66E;
-  --chart-3: #B8BF8B;
-  --chart-4: #CB9885;
-  --chart-5: #A89B90;
+  --chart-1: #78382B;
+  --chart-2: #EDBC4C;
+  --chart-3: #AB302F;
+  --chart-4: #8D765E;
+  --chart-5: #786054;
   --radius: 0.625rem;
-  --sidebar: var(--color-app-sidebar);
+  --sidebar: var(--background);
   --sidebar-foreground: var(--foreground);
-  --sidebar-primary: var(--color-brand-primary);
-  --sidebar-primary-foreground: var(--color-brand-primary-foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
   --sidebar-accent: var(--muted);
   --sidebar-accent-foreground: var(--foreground);
-  --sidebar-border: var(--color-app-border);
+  --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
 }
-
-.dark {
-  --background: var(--color-app-background);
-  --foreground: #FAF6F2;
-  --card: var(--color-app-card);
-  --card-foreground: var(--foreground);
-  --popover: var(--color-app-card);
-  --popover-foreground: var(--foreground);
-  --primary: var(--color-brand-primary);
-  --primary-foreground: var(--color-brand-primary-foreground);
-  --secondary: #392D25;
-  --secondary-foreground: var(--color-brand-highlight);
-  --muted: #302923;
-  --muted-foreground: #C1B5AA;
-  --accent: #392D25;
-  --accent-foreground: var(--foreground);
-  --destructive: #F29186;
-  --border: var(--color-app-border);
-  --input: var(--color-app-border);
-  --ring: var(--color-brand-highlight);
-  --chart-1: #F49A72;
-  --chart-2: #E9B66E;
-  --chart-3: #B8BF8B;
-  --chart-4: #CB9885;
-  --chart-5: #A89B90;
-  --sidebar: var(--color-app-sidebar);
-  --sidebar-foreground: var(--foreground);
-  --sidebar-primary: var(--color-brand-primary);
-  --sidebar-primary-foreground: var(--color-brand-primary-foreground);
-  --sidebar-accent: var(--muted);
-  --sidebar-accent-foreground: var(--foreground);
-  --sidebar-border: var(--color-app-border);
-  --sidebar-ring: var(--ring);
-}
-
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  * { @apply border-border outline-ring/50; }
+  html { @apply font-sans; }
+  body { @apply bg-background text-foreground; }
+  h1, h2, h3 {
+    @apply font-heading text-brand-highlight;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
+  button { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
 }
-
-button{
-  cursor: pointer
+.wordmark {
+  font-family: var(--font-fraunces), serif;
+  color: var(--color-brand-highlight);
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 1.2;
+}
+.wordmark span {
+  text-decoration: underline;
+  text-decoration-color: var(--color-brand-primary);
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.1em;
+}
+.order-card { border-top: 3px solid var(--color-brand-highlight); }
+.receipt-divider { border-top-style: dashed; border-top-color: var(--color-app-control-border); }
+.status-badge { background: var(--color-status-production-background); color: var(--color-status-production); }
+.price { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

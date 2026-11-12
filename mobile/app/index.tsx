@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useSegments, useRouter } from 'expo-router';
 import { colors } from '../constants/theme';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,7 +22,7 @@ export default function Index(){
     }else if(!signed){
       router.replace("/login");
     }
-  }, [loading, signed, router])
+  }, [loading, signed, router, segments])
 
   if (loading) {
     return (

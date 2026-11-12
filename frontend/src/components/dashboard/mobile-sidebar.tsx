@@ -14,6 +14,7 @@ interface SidebarProps {
 }
 
 const menuItems = [
+  { title: "Cadastrar atendente", href: "/register", icon: Tags },
   {
     title: "Pedidos",
     href: "/dashboard",
@@ -59,7 +60,7 @@ export function MobileSidebar() {
                     href={menu.href} 
                     key={menu.title}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2 text-sm rounded-md font-medium transition-colors duration-300 text-foreground",
+                      "flex items-center gap-3 min-h-12 px-4 py-3 text-sm rounded-md font-medium transition-colors duration-150 text-foreground",
                       isActive ? "bg-brand-primary text-brand-primary-foreground" : "hover:bg-muted"
                     )}
                   >
@@ -87,7 +88,7 @@ export function MobileSidebar() {
 
           </Sheet>
 
-          <h1 className="text-lg font-bold">
+          <h1 className="wordmark text-2xl">
             pizza<span className="text-brand-highlight">UP</span>
           </h1>
 
